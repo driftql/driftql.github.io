@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Drift Policy is a one-step generative policy for offline reinforcement learning built around conditional drift fields.">
+  <meta name="keywords" content="Drift Q-Learning, Offline RL, Diffusion Policies, Flow Matching, Generative Policies">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Drift Policies</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="#">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          Navigate
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="#animations-section">
+            Animations
+          </a>
+          <a class="navbar-item" href="#abstract-section">
+            Abstract
+          </a>
+          <a class="navbar-item" href="#method-section">
+            Algorithm
+          </a>
+          <a class="navbar-item" href="#interactive-demo">
+            Interactive Demo
+          </a>
+          <a class="navbar-item" href="#experiments-section">
+            Experiments
+          </a>
+          <a class="navbar-item" href="#BibTeX">
+            BibTeX
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Drift Policies</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Anonymous Authors</span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">NeurIPS 2026 Submission</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <span class="external-link button is-normal is-rounded is-light unavailable-link">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper Coming Soon</span>
+                </span>
+              </span>
+              <span class="link-block">
+                <span class="external-link button is-normal is-rounded is-light unavailable-link">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code Coming Soon</span>
+                </span>
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="animations-section">
+  <div class="container is-max-desktop">
+    <div class="columns is-multiline animation-grid">
+      <div class="column is-half-tablet is-one-quarter-desktop">
+        <div class="animation-card">
+          <video class="sync-loop" muted loop playsinline preload="auto">
+            <source src="./static/videos/rings.mp4" type="video/mp4">
+          </video>
+          <p>Rings</p>
+        </div>
+      </div>
+      <div class="column is-half-tablet is-one-quarter-desktop">
+        <div class="animation-card">
+          <video class="sync-loop" muted loop playsinline preload="auto">
+            <source src="./static/videos/scurve.mp4" type="video/mp4">
+          </video>
+          <p>S-Curve</p>
+        </div>
+      </div>
+      <div class="column is-half-tablet is-one-quarter-desktop">
+        <div class="animation-card">
+          <video class="sync-loop" muted loop playsinline preload="auto">
+            <source src="./static/videos/spiral.mp4" type="video/mp4">
+          </video>
+          <p>Spiral</p>
+        </div>
+      </div>
+      <div class="column is-half-tablet is-one-quarter-desktop">
+        <div class="animation-card">
+          <video class="sync-loop" muted loop playsinline preload="auto">
+            <source src="./static/videos/star.mp4" type="video/mp4">
+          </video>
+          <p>Star</p>
+        </div>
+      </div>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-full-width has-text-centered">
+        <p class="section-subtitle">
+          Four 2D targets showing how attraction to data and repulsion between generated particles shape the drift field.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="abstract-section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Diffusion and flow policies have emerged as strong generative policies for offline reinforcement
+            learning, but their expressivity typically comes with expensive iterative inference. <strong>Drift
+            Q-Learning</strong> asks whether that cost is actually necessary. Our method trains a one-step stochastic actor with a conditional drift field that pulls generated
+            actions toward the offline data manifold while pushing them away from one another to prevent
+            collapse. Rather than transporting a simple prior to a complex action distribution at test time,
+            Drift Q-Learning amortizes that transport into the generator during training through a simple
+            regression objective. The result is an expressive offline RL policy that requires no denoising schedule, no ODE solver,
+            and no distillation architecture at inference. Across D4RL and OGBench, the goal is to match or
+            exceed strong diffusion and flow-matching baselines while acting in a single forward pass.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<section class="section" id="method-section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">Algorithm</h2>
+      </div>
+    </div>
+
+    <div class="columns is-centered has-text-centered how-it-works-math-intro" style="padding-top: 1.5rem;">
+      <div class="column is-four-fifths">
+        <h3 class="title is-3">The Math</h3>
+        <div class="content has-text-justified">
+          <p>
+            The core object in Drift Q-Learning is a state-conditional drift field over actions. For each
+            state, generated actions are pulled toward the observed dataset action and pushed away from one
+            another. This gives a geometrically meaningful alternative to scalar behavior-cloning penalties.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="columns">
+      <div class="column">
+        <div class="equation-panel">
+          <h3 class="title is-4">Pairwise geometry</h3>
+          <div class="content has-text-justified">
+            <p>
+              For a state \(s\), let \(a^+\) be the dataset action and let \(\{\hat{a}_i\}_{i=1}^{N}\)
+              be actions sampled from the current policy. Distances to the positive action and to other
+              generated actions are normalized by action dimension:
+            </p>
+          </div>
+          <div class="equation-block">
+            \[
+              d^+_{i} = \frac{\|\hat{a}_i - a^+\|_2}{\sqrt{d_a}},
+              \qquad
+              d^-_{ik} = \frac{\|\hat{a}_i - \hat{a}_k\|_2}{\sqrt{d_a}}.
+            \]
+          </div>
+          <div class="content has-text-justified">
+            <p>
+              These distances are converted into Laplace or Gaussian kernel weights, giving a local notion
+              of which data points and generated particles should matter most for each sample.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="equation-panel">
+          <h3 class="title is-4">The drift vector</h3>
+          <div class="content has-text-justified">
+            <p>
+              The drift is the difference between an attraction term and a repulsion term:
+            </p>
+          </div>
+          <div class="equation-block">
+            \[
+              V_i =
+              \underbrace{(a^+ - \hat{a}_i)}_{\text{attraction}}
+              -
+              \underbrace{\sum_{k \neq i} w^-_{ik} (\hat{a}_k - \hat{a}_i)}_{\text{repulsion}}.
+            \]
+          </div>
+          <div class="content has-text-justified">
+            <p>
+              Attraction keeps the actor tied to the offline support. Repulsion prevents the generated
+              distribution from collapsing to a single mode.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <div class="equation-panel">
+          <h3 class="title is-4">Amortized drift regression</h3>
+          <div class="content has-text-justified">
+            <p>
+              Instead of simulating a long inference chain, the actor is trained to regress toward a
+              drift-corrected target at each update:
+            </p>
+          </div>
+          <div class="equation-block">
+            \[
+              \tilde{V}_i = \frac{V_i}{\lambda + \varepsilon},
+              \qquad
+              \mathcal{L}_{\mathrm{drift}}(\theta)
+              =
+              \frac{1}{N}
+              \sum_{i=1}^{N}
+              \left\|
+                \hat{a}_i -
+                \operatorname{sg}
+                \left(
+                  \operatorname{clip}(\hat{a}_i + \tilde{V}_i, -1, 1)
+                \right)
+              \right\|^2.
+            \]
+          </div>
+          <div class="content has-text-justified">
+            <p>
+              This is the core one-step idea: transport is pushed into training, so inference only needs a
+              single actor forward pass rather than iterative denoising or ODE integration.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="anim-section" style="margin-bottom: 2.5rem;">
+<style>
+  #anim-section canvas {
+    width: 100%; border-radius: 10px;
+    border: 1px solid #e5e5e5; background: #fafafa;
+    display: block; cursor: pointer;
+  }
+  #anim-wrap { position: relative; }
+  #anim-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px; background: rgba(250,250,250,0.75); z-index: 2;
+  }
+  #anim-overlay.hidden { display: none; }
+  #startA {
+    padding: 14px 40px; font-size: 15px;
+    font-family: 'Noto Sans', sans-serif; font-weight: 500;
+    background: #fff; border: 1.5px solid #ccc;
+    color: #333; border-radius: 30px; cursor: pointer; transition: all 0.25s;
+  }
+  #startA:hover { border-color: #2563eb; color: #2563eb; }
+  #anim-pips { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
+  #anim-pips .pip {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #ddd; transition: background 0.3s; cursor: pointer;
+  }
+  #anim-pips .pip.active { background: #2563eb; }
+  #anim-pips .pip.past { background: #93c5fd; }
+  #anim-nav { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+  #anim-nav button {
+    padding: 5px 16px; font-size: 12px;
+    font-family: 'Noto Sans', sans-serif; font-weight: 500;
+    background: #fff; border: 1px solid #ddd;
+    color: #888; border-radius: 5px; cursor: pointer; transition: all 0.2s;
+  }
+  #anim-nav button:hover { border-color: #93c5fd; color: #2563eb; }
+</style>
+
+<div class="container is-max-desktop">
+  <div class="content has-text-centered">
+    <h3 class="title is-3">Intuition</h3>
+    <p class="subtitle is-6">A step-by-step visual walkthrough</p>
+  </div>
+  <div id="anim-wrap">
+    <canvas id="ac" width="800" height="500"></canvas>
+    <div id="anim-overlay"><button id="startA">Drift Away</button></div>
+  </div>
+  <div id="anim-pips"></div>
+  <div id="anim-nav" style="display:none;">
+    <button id="pBtn">← prev</button>
+    <button id="ppBtn">pause</button>
+    <button id="nBtn">next →</button>
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+const C=document.getElementById('ac'),X=C.getContext('2d');
+const W=C.width,H=C.height,cx=W/2,cy=H/2;
+
+const TOP_BAR=56;
+const BOT_BAR=70;
+const SAFE_TOP=TOP_BAR+8;
+const SAFE_BOT=H-BOT_BAR-8;
+
+function easeIO(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+function easeO(t){return 1-Math.pow(1-t,3);}
+function easeI(t){return t*t*t;}
+function lp(a,b,t){return a+(b-a)*t;}
+
+const COL={
+  bg:'#fafafa', barBg:'#f0f0f0',
+  target:'#2563eb',
+  gen:'#dc2626',
+  attract:'#059669', repel:'#ea580c',
+  drift:'#7c3aed',
+  text:'#111', textDim:'#777', textLight:'#aaa',
+  math:'#2563eb',
+};
+
+const FSANS="'Noto Sans', 'Google Sans', sans-serif";
+const FSERIF="'Castoro', 'Georgia', serif";
+
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+let tP=[],gP=[];
+function initPts(){
+  tP=[];
+  for(let i=0;i<120;i++){const t=Math.PI*i/120;tP.push([Math.cos(t)+randn()*0.04,Math.sin(t)+randn()*0.04]);}
+  for(let i=0;i<120;i++){const t=Math.PI*i/120;tP.push([1-Math.cos(t)+randn()*0.04,-Math.sin(t)+0.5+randn()*0.04]);}
+  gP=[];for(let i=0;i<40;i++)gP.push([0.5+randn()*0.5,0.25+randn()*0.5]);
+}
+initPts();
+
+const sc=120;
+const scx=cx, scy=(SAFE_TOP+SAFE_BOT)/2+10;
+function toS(p){return[scx+p[0]*sc-0.25*sc,scy-p[1]*sc+0.08*sc];}
+
+function compW(x,pts,tau){
+  const ds=pts.map(p=>Math.sqrt((p[0]-x[0])**2+(p[1]-x[1])**2+1e-12));
+  const lg=ds.map(d=>-d/tau);const mx=Math.max(...lg);
+  const ex=lg.map(l=>Math.exp(l-mx));const sm=ex.reduce((a,b)=>a+b,0);
+  return ex.map(e=>e/sm);
+}
+function compMS(x,pts,w){let vx=0,vy=0;for(let j=0;j<pts.length;j++){vx+=w[j]*(pts[j][0]-x[0]);vy+=w[j]*(pts[j][1]-x[1]);}return[vx,vy];}
+function compDrift(gPts,tPts,tau){
+  return gPts.map((x,i)=>{
+    const wP=compW(x,tPts,tau),vA=compMS(x,tPts,wP);
+    const oth=gPts.filter((_,j)=>j!==i),wN=compW(x,oth,tau),vR=compMS(x,oth,wN);
+    return[vA[0]-vR[0],vA[1]-vR[1]];
+  });
+}
+
+function clear(){X.fillStyle=COL.bg;X.fillRect(0,0,W,H);}
+function dot(p,r,col,a=1){const[sx,sy]=toS(p);if(sy<SAFE_TOP||sy>SAFE_BOT)return;X.globalAlpha=a;X.fillStyle=col;X.beginPath();X.arc(sx,sy,r,0,Math.PI*2);X.fill();X.globalAlpha=1;}
+function ln(a,b,col,w=1,al=1){const[ax,ay]=toS(a),[bx,by]=toS(b);X.globalAlpha=al;X.strokeStyle=col;X.lineWidth=w;X.beginPath();X.moveTo(ax,ay);X.lineTo(bx,by);X.stroke();X.globalAlpha=1;}
+function arrow(from,to,col,w=2.5,al=1,hs=10){const[fx,fy]=toS(from),[tx,ty]=toS(to);const ang=Math.atan2(ty-fy,tx-fx);X.globalAlpha=al;X.strokeStyle=col;X.lineWidth=w;X.lineCap='round';X.beginPath();X.moveTo(fx,fy);X.lineTo(tx,ty);X.stroke();X.fillStyle=col;X.beginPath();X.moveTo(tx,ty);X.lineTo(tx-hs*Math.cos(ang-0.35),ty-hs*Math.sin(ang-0.35));X.lineTo(tx-hs*Math.cos(ang+0.35),ty-hs*Math.sin(ang+0.35));X.closePath();X.fill();X.globalAlpha=1;}
+function ring(p,r,col,w=2,al=1){const[sx,sy]=toS(p);X.globalAlpha=al;X.strokeStyle=col;X.lineWidth=w;X.beginPath();X.arc(sx,sy,r,0,Math.PI*2);X.stroke();X.globalAlpha=1;}
+
+function txt(text,x,y,{size=16,color=COL.text,align='center',weight=400,alpha=1,serif=false}={}){
+  X.globalAlpha=alpha;X.fillStyle=color;
+  X.font=`${weight} ${size}px ${serif?FSERIF:FSANS}`;
+  X.textAlign=align;X.textBaseline='middle';X.fillText(text,x,y);X.globalAlpha=1;
+}
+function eq(text,x,y,{size=18,color=COL.math,alpha=1}={}){
+  txt(text,x,y,{size,color,alpha,serif:true,weight:400});
+}
+
+function drawTopBar(text,alpha=1){
+  X.fillStyle=COL.barBg;X.fillRect(0,0,W,TOP_BAR);
+  X.fillStyle='rgba(0,0,0,0.06)';X.fillRect(0,TOP_BAR-1,W,1);
+  if(text&&alpha>0)txt(text,cx,TOP_BAR/2,{size:14,color:COL.text,alpha:alpha*0.85,weight:500});
+}
+function drawBotBar(eqText,capText,eqAlpha=1,capAlpha=1){
+  X.fillStyle=COL.barBg;X.fillRect(0,H-BOT_BAR,W,BOT_BAR);
+  X.fillStyle='rgba(0,0,0,0.06)';X.fillRect(0,H-BOT_BAR,W,1);
+  if(eqText&&eqAlpha>0)eq(eqText,cx,H-BOT_BAR+22,{size:15,alpha:eqAlpha*0.75});
+  if(capText&&capAlpha>0)txt(capText,cx,H-BOT_BAR+48,{size:13,color:COL.textDim,alpha:capAlpha*0.7});
+}
+
+const FI=20;
+const fP=()=>gP[FI];
+let wPos,vA,wNeg,vR,negVR,d0;
+function precomp(){
+  const x=fP();wPos=compW(x,tP,0.25);vA=compMS(x,tP,wPos);
+  const oth=gP.filter((_,j)=>j!==FI);wNeg=compW(x,oth,0.25);vR=compMS(x,oth,wNeg);
+  negVR=[-vR[0],-vR[1]];
+  d0=[vA[0]-vR[0],vA[1]-vR[1]];
+}
+
+const scenes=[
+  {dur:3.5,draw(t){
+    clear();
+    const a=easeO(Math.min(t*2,1));
+    txt('The Drift Policy',cx,cy-20,{size:34,color:COL.text,alpha:a,weight:600});
+    eq('Δ(x) = V_attract(x) − V_repel(x)',cx,cy+28,{size:18,alpha:a*0.45});
+    const fo=t>0.75?easeI((t-0.75)/0.25):0;
+    if(fo>0){X.fillStyle=COL.bg;X.globalAlpha=fo;X.fillRect(0,0,W,H);X.globalAlpha=1;}
+  }},
+  {dur:4,draw(t){
+    clear();
+    const tIn=easeO(Math.min(t*2.5,1)),gIn=easeO(Math.max(0,(t-0.3)*2.5));
+    for(const p of tP)dot(p,3,COL.target,tIn*0.45);
+    for(const p of gP)dot(p,4.5,COL.gen,gIn*0.7);
+    drawTopBar('The setup: target data and generated samples',easeO(Math.min(t*3,1)));
+    const ea=t>0.65?easeO((t-0.65)/0.3):0;
+    drawBotBar(null,'How does each sample know where to move?',0,ea);
+    if(tIn>0.5)txt('Target  p',140,SAFE_TOP+16,{size:14,color:COL.target,alpha:easeO((tIn-0.5)/0.5),weight:500,serif:true});
+    if(gIn>0.5)txt('Generated  q',W-160,SAFE_TOP+16,{size:14,color:COL.gen,alpha:easeO((gIn-0.5)/0.5),weight:500,serif:true});
+  }},
+  {dur:3.5,draw(t){
+    clear();
+    for(const p of tP)dot(p,3,COL.target,0.28);
+    const dimT=easeO(Math.min(t*3,1));
+    for(let i=0;i<gP.length;i++){
+      if(i===FI){dot(gP[i],6,COL.gen,1);ring(gP[i],15+Math.sin(t*7)*2,COL.gen,2,0.5);}
+      else dot(gP[i],4,COL.gen,lp(0.7,0.12,dimT));
+    }
+    const[sx,sy]=toS(fP());
+    const a=easeO(Math.min(t*2,1));
+    txt('xᵢ',sx+22,sy-22,{size:18,color:COL.gen,alpha:a,weight:600,serif:true});
+    drawTopBar('Focus on a single generated sample',easeO(Math.min(t*3,1)));
+    drawBotBar(null,'We will compute a drift direction for this sample',0,t>0.5?easeO((t-0.5)/0.35):0);
+  }},
+  {dur:5,draw(t){
+    clear();
+    for(const p of tP)dot(p,3,COL.target,0.2);
+    for(let i=0;i<gP.length;i++){if(i!==FI)dot(gP[i],3,COL.gen,0.07);}
+    const lT=easeO(Math.min(t*2,1)),wT=easeO(Math.max(0,(t-0.3)*2));
+    const x=fP(),topK=wPos.map((w,i)=>({w,i})).sort((a,b)=>b.w-a.w).slice(0,20);
+    for(const{w,i}of topK){
+      const vis=lT*(wT>0?lp(0.1,Math.min(w*80,1),wT):0.1);
+      const lw=wT>0?lp(0.5,Math.min(w*60,4),wT):0.5;
+      ln(x,tP[i],COL.target,lw,vis);
+    }
+    dot(x,6,COL.gen,1);ring(x,14,COL.gen,2,0.4);
+    drawTopBar('Step 1 — Compute kernel weights to each target point',easeO(Math.min(t*3,1)));
+    drawBotBar('wⱼ = softmax( −‖xᵢ − yⱼ‖ / τ )','Closer target points receive exponentially more weight',wT,wT);
+  }},
+  {dur:4,draw(t){
+    clear();
+    for(const p of tP)dot(p,3,COL.target,0.2);
+    for(let i=0;i<gP.length;i++){if(i!==FI)dot(gP[i],3,COL.gen,0.07);}
+    const x=fP(),topK=wPos.map((w,i)=>({w,i})).sort((a,b)=>b.w-a.w).slice(0,15);
+    for(const{w,i}of topK)ln(x,tP[i],COL.target,Math.min(w*60,3.5),Math.min(w*80,0.6));
+    dot(x,6,COL.gen,1);
+    const aT=easeO(Math.min(t*2,1)),as=2.5;
+    const tip=[x[0]+vA[0]*as*aT,x[1]+vA[1]*as*aT];
+    arrow(x,tip,COL.attract,3,aT,12);
+    const[ax,ay]=toS([x[0]+vA[0]*as*0.55,x[1]+vA[1]*as*0.55]);
+    if(aT>0.5&&ay>SAFE_TOP&&ay<SAFE_BOT)txt('V_attract',ax+22,ay-14,{size:12,color:COL.attract,alpha:(aT-0.5)*2,weight:600});
+    drawTopBar('Step 2 — Attraction: weighted pull toward the data',easeO(Math.min(t*3,1)));
+    const a=easeO(Math.min(t*2.5,1));
+    drawBotBar('V_attract(x) = Σⱼ wⱼ · (yⱼ − x)','The mean-shift vector pointing toward nearby data',a,a);
+  }},
+  {dur:4.5,draw(t){
+    clear();
+    for(const p of tP)dot(p,3,COL.target,0.1);
+    const x=fP(),rT=easeO(Math.min(t*2,1));
+    for(let i=0;i<gP.length;i++){
+      if(i===FI)continue;
+      const d=Math.sqrt((gP[i][0]-x[0])**2+(gP[i][1]-x[1])**2);
+      const vis=Math.max(0.06,Math.min(0.5,0.45/d))*rT;
+      ln(x,gP[i],COL.repel,0.6,vis*0.25);dot(gP[i],4,COL.gen,vis);
+    }
+    dot(x,6,COL.gen,1);
+    const as=2.5;
+    arrow(x,[x[0]+vA[0]*as,x[1]+vA[1]*as],COL.attract,2,0.2,9);
+    const rr=easeO(Math.max(0,(t-0.3)*2));
+    const repTip=[x[0]+negVR[0]*as*rr,x[1]+negVR[1]*as*rr];
+    arrow(x,repTip,COL.repel,3,rr,12);
+    const[ax2,ay2]=toS([x[0]+negVR[0]*as*0.55*rr,x[1]+negVR[1]*as*0.55*rr]);
+    if(rr>0.5&&ay2>SAFE_TOP&&ay2<SAFE_BOT)txt('−V_repel',ax2+22,ay2+14,{size:12,color:COL.repel,alpha:(rr-0.5)*2,weight:600});
+    drawTopBar('Step 3 — Repulsion: push away from other generated samples',easeO(Math.min(t*3,1)));
+    const a=easeO(Math.min(t*2.5,1));
+    drawBotBar('−V_repel(x) = −Σⱼ wⱼ · (qⱼ − x)','Prevents samples from collapsing onto each other',a,a);
+  }},
+  {dur:5,draw(t){
+    clear();
+    for(const p of tP)dot(p,3,COL.target,0.15);
+    for(let i=0;i<gP.length;i++){if(i!==FI)dot(gP[i],3,COL.gen,0.08);}
+    const x=fP(),as=2.5;dot(x,6,COL.gen,1);
+    const fo=1-easeI(Math.max(0,(t-0.4)*2.5));
+    arrow(x,[x[0]+vA[0]*as,x[1]+vA[1]*as],COL.attract,2,Math.max(0.08,fo*0.45),9);
+    arrow(x,[x[0]+negVR[0]*as,x[1]+negVR[1]*as],COL.repel,2,Math.max(0.08,fo*0.45),9);
+    const dT=easeO(Math.max(0,(t-0.2)*2));
+    const dTip=[x[0]+d0[0]*as*dT,x[1]+d0[1]*as*dT];
+    arrow(x,dTip,COL.drift,3.5,dT,14);
+    const[dx,dy]=toS([x[0]+d0[0]*as*0.6*dT,x[1]+d0[1]*as*0.6*dT]);
+    if(dT>0.5&&dy>SAFE_TOP&&dy<SAFE_BOT)txt('Δ(x)',dx+20,dy-16,{size:13,color:COL.drift,alpha:(dT-0.5)*2,weight:600,serif:true});
+    drawTopBar('Step 4 — The drift: attraction minus repulsion',easeO(Math.min(t*3,1)));
+    const a=easeO(Math.min(t*2,1));
+    const ca=t>0.55?easeO((t-0.55)/0.35):0;
+    drawBotBar('Δ(x) = V_attract(x) − V_repel(x)','Toward the data, away from the crowd',a,ca);
+  }},
+  {dur:4,draw(t){
+    clear();
+    for(const p of tP)dot(p,3,COL.target,0.28);
+    const sT=easeIO(Math.min(t*1.8,1)),aD=compDrift(gP,tP,0.25),eta=0.6;
+    for(let i=0;i<gP.length;i++){
+      const x=gP[i],tip=[x[0]+aD[i][0]*eta,x[1]+aD[i][1]*eta];
+      const cur=[lp(x[0],tip[0],sT),lp(x[1],tip[1],sT)];
+      if(sT<0.9)arrow(x,[x[0]+aD[i][0]*2,x[1]+aD[i][1]*2],COL.drift,1.3,(1-sT)*0.4,6);
+      dot(cur,4.5,COL.gen,0.8);
+    }
+    drawTopBar('Step 5 — Apply the drift to every sample simultaneously',easeO(Math.min(t*3,1)));
+    const a=easeO(Math.min(t*3,1));
+    drawBotBar('xᵢ  ←  xᵢ + η · Δ(xᵢ)','Each sample steps along its drift direction',a,a);
+  }},
+  {dur:6,draw(t){
+    clear();
+    const total=18,step=t*total;
+    const done=Math.min(Math.floor(step),total);
+    for(const p of tP)dot(p,3,COL.target,0.32);
+    let cur=gP.map(p=>[...p]);const tau=0.25,eta=0.5;
+    for(let s=0;s<done;s++){const d=compDrift(cur,tP,tau);cur=cur.map((p,i)=>[p[0]+eta*d[i][0],p[1]+eta*d[i][1]]);}
+    const part=step-done;
+    if(done<total){const d=compDrift(cur,tP,tau);cur=cur.map((p,i)=>[lp(p[0],p[0]+eta*d[i][0],part),lp(p[1],p[1]+eta*d[i][1],part)]);}
+    const f=done/total;
+    const col=`rgb(${Math.round(lp(220,5,f))},${Math.round(lp(38,150,f))},${Math.round(lp(38,105,f))})`;
+    for(const p of cur)dot(p,4.5,col,0.85);
+    drawTopBar(`Repeat — recompute and step (iteration ${done} of ${total})`,easeO(Math.min(t*4,1)));
+    const ca=t>0.88?easeO((t-0.88)/0.12):0;
+    drawBotBar(null,'Generated samples now match the target distribution',0,ca);
+  }},
+  {dur:6,draw(t){
+    clear();
+    const a=easeO(Math.min(t*2,1));
+    let cur=gP.map(p=>[...p]);
+    for(let s=0;s<18;s++){const d=compDrift(cur,tP,0.25);cur=cur.map((p,i)=>[p[0]+0.5*d[i][0],p[1]+0.5*d[i][1]]);}
+    for(const p of tP)dot(p,3,COL.target,a*0.15);
+    for(const p of cur)dot(p,4,COL.attract,a*0.4);
+    const panelH=200;
+    X.fillStyle=COL.bg;X.globalAlpha=a*0.92;X.fillRect(0,TOP_BAR,W,panelH);X.globalAlpha=1;
+    const y0=TOP_BAR+30;
+    txt('The Drift Policy',cx,y0,{size:22,color:COL.text,alpha:a,weight:600});
+    const steps=[
+      {n:'1',label:'Attract',desc:'pull each sample toward nearby target data',col:COL.attract},
+      {n:'2',label:'Repel',desc:'push away from other generated samples',col:COL.repel},
+      {n:'3',label:'Combine',desc:'drift = attraction minus repulsion',col:COL.drift},
+      {n:'4',label:'Step',desc:'move every sample along its drift direction',col:COL.text},
+      {n:'5',label:'Repeat',desc:'recompute and iterate until convergence',col:COL.textDim},
+    ];
+    for(let i=0;i<steps.length;i++){
+      const la=easeO(Math.max(0,(t-0.15-i*0.07)*3));
+      const yy=y0+36+i*28;
+      txt(steps[i].n+'.',cx-210,yy,{size:13,color:COL.textLight,alpha:la,weight:500});
+      txt(steps[i].label,cx-180,yy,{size:14,color:steps[i].col,alpha:la,weight:600,align:'left'});
+      txt(steps[i].desc,cx-110,yy,{size:13,color:COL.textDim,alpha:la,weight:400,align:'left'});
+    }
+    drawTopBar('Summary',a);
+  }},
+];
+
+const pipDiv=document.getElementById('anim-pips');
+for(let i=0;i<scenes.length;i++){const p=document.createElement('div');p.className='pip';p.addEventListener('click',()=>{si=i;st=0;});pipDiv.appendChild(p);}
+function uPips(){pipDiv.querySelectorAll('.pip').forEach((p,i)=>{p.classList.toggle('active',i===si);p.classList.toggle('past',i<si);});}
+
+let si=0,st=0,run=false,auto=true,lt=0,paused=false;
+
+function tick(ts){
+  if(!run)return;if(!lt)lt=ts;
+  const dt=paused?0:Math.min((ts-lt)/1000,0.05);lt=ts;st+=dt;
+  const t=Math.min(st/scenes[si].dur,1);
+  scenes[si].draw(t);uPips();
+  if(t>=1&&auto&&!paused){if(si<scenes.length-1){si++;st=0;}}
+  requestAnimationFrame(tick);
+}
+
+document.getElementById('startA').addEventListener('click',()=>{
+  document.getElementById('anim-overlay').classList.add('hidden');
+  document.getElementById('anim-nav').style.display='flex';
+  precomp();run=true;lt=0;requestAnimationFrame(tick);
+});
+document.getElementById('nBtn').addEventListener('click',()=>{if(si<scenes.length-1){si++;st=0;}});
+document.getElementById('pBtn').addEventListener('click',()=>{if(si>0){si--;st=0;}});
+document.getElementById('ppBtn').addEventListener('click',()=>{paused=!paused;lt=0;document.getElementById('ppBtn').textContent=paused?'play':'pause';});
+C.addEventListener('click',()=>{if(!run)return;if(si<scenes.length-1){si++;st=0;}});
+document.addEventListener('keydown',e=>{
+  if(!run)return;
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();if(si<scenes.length-1){si++;st=0;}}
+  if(e.key==='ArrowLeft'){if(si>0){si--;st=0;}}
+  if(e.key==='p'){paused=!paused;lt=0;document.getElementById('ppBtn').textContent=paused?'play':'pause';}
+});
+})();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const abstractSection = document.getElementById('abstract-section');
+  const interactiveDemo = document.getElementById('interactive-demo');
+  if (abstractSection && interactiveDemo && abstractSection.nextElementSibling !== interactiveDemo) {
+    abstractSection.insertAdjacentElement('afterend', interactiveDemo);
+  }
+
+  const methodSection = document.getElementById('method-section');
+  const methodContainer = methodSection && methodSection.querySelector('.container.is-max-desktop');
+  const animSection = document.getElementById('anim-section');
+  const mathIntro = methodSection && methodSection.querySelector('.how-it-works-math-intro');
+  if (methodContainer && animSection && mathIntro && animSection.parentElement !== methodContainer) {
+    methodContainer.insertBefore(animSection, mathIntro);
+  }
+});
+</script>
+
+<section class="section" id="interactive-demo">
+<style>
+  #drift-demo * { box-sizing: border-box; }
+  #drift-demo canvas {
+    width: 100%; border-radius: 8px; cursor: crosshair;
+    border: 1px solid #d9d1c5; background: #fff;
+  }
+  #drift-demo .panel-box {
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 14px; border-radius: 8px; border: 1px solid #e5ddd2;
+    background: #fbf9f5;
+    box-shadow: 0 8px 24px rgba(20, 20, 20, 0.05);
+  }
+  #drift-demo .sec-label {
+    font-size: 10px; color: #7a7a7a; text-transform: uppercase;
+    letter-spacing: 0.6px; margin-bottom: 3px; font-weight: 600;
+  }
+  #drift-demo .pgrid { display: flex; flex-wrap: wrap; gap: 4px; }
+  #drift-demo .pgrid button { font-size: 11px; padding: 3px 8px; }
+  #drift-demo .hint {
+    font-size: 11px; color: #6d6d6d; padding: 5px 8px;
+    background: #f3efe8; border-radius: 5px; line-height: 1.4;
+    border: 1px solid #e7dfd4;
+  }
+  #drift-demo button {
+    font-size: 13px; padding: 5px 10px; border-radius: 6px;
+    border: 1px solid #d6cec2; background: #fff; cursor: pointer;
+    color: #2d2d2d; transition: all 0.15s;
+  }
+  #drift-demo button:hover { background: #f5f2ed; }
+  #drift-demo button:active { transform: scale(0.98); }
+  #drift-demo .kbtn.active, #drift-demo .mode-btn.active {
+    border: 2px solid #363636; font-weight: 600;
+    background: #f3f0eb;
+  }
+  #drift-demo .mode-btn { font-size: 12px; padding: 4px 10px; }
+  #drift-demo .dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; margin-right: 4px; vertical-align: middle;
+  }
+  #drift-demo .dot-t { background: #4A90D9; }
+  #drift-demo .dot-b { background: #D94A4A; }
+  #drift-demo .cnt { font-size: 10px; color: #aaa; font-style: normal; }
+  #drift-demo input[type=range] { width: 100%; accent-color: #363636; }
+  #drift-demo .srow { display: flex; justify-content: space-between; align-items: center; }
+  #drift-demo .srow label { font-size: 12px; color: #666; }
+  #drift-demo .sval { font-size: 12px; font-weight: 600; color: #444; }
+  #drift-demo .transport-bar {
+    display: flex; align-items: center; gap: 8px; margin-top: 8px;
+  }
+  #drift-demo .sim-btn {
+    background: #363636 !important; color: #fff !important;
+    font-weight: 600; border-color: #3b82f6 !important;
+    min-width: 90px; text-align: center;
+  }
+  #drift-demo .sim-btn { border-color: #363636 !important; }
+  #drift-demo .sim-btn:hover { background: #1f1f1f !important; }
+  #drift-demo .clear-btn { font-size: 11px; padding: 4px 10px; color: #999; }
+  #drift-demo .step-lbl { font-size: 13px; color: #888; min-width: 42px; }
+  #drift-demo .canvas-wrap { position: relative; }
+  #drift-demo .onboard {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 18px;
+    padding: 1.5rem;
+    border-radius: 10px;
+    background: rgba(251, 249, 245, 0.95);
+    z-index: 5;
+    cursor: pointer;
+    transition: opacity 0.35s ease;
+  }
+  #drift-demo .onboard.gone {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #drift-demo .ob-steps {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  #drift-demo .ob-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 120px;
+    text-align: center;
+  }
+  #drift-demo .ob-icon {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #drift-demo .ob-icon.ic-t { background: rgba(74, 144, 217, 0.12); }
+  #drift-demo .ob-icon.ic-b { background: rgba(217, 74, 74, 0.12); }
+  #drift-demo .ob-icon.ic-s { background: rgba(54, 54, 54, 0.08); }
+  #drift-demo .ob-num {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #363636;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  #drift-demo .ob-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2d2d2d;
+    line-height: 1.2;
+  }
+  #drift-demo .ob-desc {
+    font-size: 10px;
+    line-height: 1.3;
+    color: #8a8176;
+  }
+  #drift-demo .ob-arrow {
+    margin-top: 16px;
+    font-size: 20px;
+    color: #c5bbaf;
+  }
+  #drift-demo .ob-or {
+    font-size: 11px;
+    color: #9d9488;
+    text-align: center;
+  }
+  #drift-demo .ob-cta {
+    font-size: 13px;
+    font-weight: 600;
+    color: #363636;
+    letter-spacing: 0.01em;
+    animation: obPulse 2s ease-in-out infinite;
+  }
+  @keyframes obPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+  @media screen and (max-width: 768px) {
+    #drift-demo .ob-steps {
+      gap: 8px;
+    }
+    #drift-demo .ob-step {
+      width: 104px;
+    }
+    #drift-demo .ob-arrow {
+      display: none;
+    }
+  }
+</style>
+
+<div class="container is-max-desktop" id="drift-demo">
+  <div class="content has-text-centered">
+    <h2 class="title is-3">Interactive demo</h2>
+    <p class="subtitle is-6">Draw target and base distributions, then watch the drift policy transport samples</p>
+  </div>
+
+  <div class="columns is-variable is-4">
+    <div class="column">
+      <div class="canvas-wrap">
+        <canvas id="cv" width="600" height="460"></canvas>
+        <div class="onboard" id="onboard">
+          <div class="ob-steps">
+            <div class="ob-step">
+              <div class="ob-icon ic-t">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A90D9" stroke-width="2" stroke-linecap="round">
+                  <path d="M12 19c-4 0-7-3-7-7s3-7 7-7 7 3 7 7-3 7-7 7z"></path>
+                  <circle cx="12" cy="12" r="2" fill="#4A90D9"></circle>
+                </svg>
+                <span class="ob-num">1</span>
+              </div>
+              <span class="ob-label">Draw target <i>p</i></span>
+              <span class="ob-desc">Click and drag to place blue target points</span>
+            </div>
+            <div class="ob-arrow">→</div>
+            <div class="ob-step">
+              <div class="ob-icon ic-b">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D94A4A" stroke-width="2" stroke-linecap="round">
+                  <path d="M12 19c-4 0-7-3-7-7s3-7 7-7 7 3 7 7-3 7-7 7z"></path>
+                  <circle cx="12" cy="12" r="2" fill="#D94A4A"></circle>
+                </svg>
+                <span class="ob-num">2</span>
+              </div>
+              <span class="ob-label">Draw base <i>q₀</i></span>
+              <span class="ob-desc">Switch mode and draw red starting points, or skip for auto</span>
+            </div>
+            <div class="ob-arrow">→</div>
+            <div class="ob-step">
+              <div class="ob-icon ic-s">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#363636" stroke-width="2" stroke-linecap="round">
+                  <polygon points="6,4 20,12 6,20" fill="rgba(54,54,54,0.16)"></polygon>
+                </svg>
+                <span class="ob-num">3</span>
+              </div>
+              <span class="ob-label">Hit Simulate</span>
+              <span class="ob-desc">Watch the generated samples drift toward the target</span>
+            </div>
+          </div>
+          <div class="ob-or">or pick a preset from the panel to get started</div>
+          <div class="ob-cta">Click anywhere to begin drawing</div>
+        </div>
+      </div>
+      <div class="transport-bar">
+        <button class="sim-btn" id="simBtn">Simulate</button>
+        <span class="step-lbl" id="stepLabel">t = 0</span>
+        <input type="range" id="stepSlider" min="0" max="0" value="0" step="1" style="flex:1;" />
+        <button class="clear-btn" id="clearBtn">Clear</button>
+      </div>
+    </div>
+
+    <div class="column is-one-third">
+      <div class="panel-box">
+        <div>
+          <div class="sec-label">Draw mode</div>
+          <div style="display:flex;gap:4px;margin-top:3px;">
+            <button id="modeTarget" class="mode-btn active"><span class="dot dot-t"></span>Target <i>p</i> <span class="cnt" id="tCnt">(0)</span></button>
+            <button id="modeBase" class="mode-btn"><span class="dot dot-b"></span>Base <i>q₀</i> <span class="cnt" id="bCnt">(0)</span></button>
+          </div>
+          <div class="hint" id="drawHint" style="margin-top:6px;">Click or drag to draw target points</div>
+        </div>
+
+        <div>
+          <div class="sec-label">Target presets</div>
+          <div class="pgrid">
+            <button data-p="moons">Moons</button>
+            <button data-p="spiral">Spiral</button>
+            <button data-p="rings">Rings</button>
+            <button data-p="grid">Grid</button>
+            <button data-p="star">Star</button>
+            <button data-p="scurve">S-curve</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="sec-label">Base presets</div>
+          <div class="pgrid">
+            <button data-b="gaussian">Gaussian</button>
+            <button data-b="uniform">Uniform</button>
+            <button data-b="ring">Ring</button>
+            <button data-b="corners">Corners</button>
+          </div>
+          <div style="font-size:10px;color:#aaa;margin-top:2px;">Leave empty for auto-Gaussian</div>
+        </div>
+
+        <div>
+          <div class="sec-label">Kernel</div>
+          <div style="display:flex;gap:4px;margin-top:3px;">
+            <button id="kLap" class="kbtn active">Laplace</button>
+            <button id="kGau" class="kbtn">Gaussian</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="srow"><label>Temperature τ</label><span class="sval" id="tauV">0.25</span></div>
+          <input type="range" id="tau" min="0.05" max="1.0" value="0.25" step="0.05" />
+        </div>
+        <div>
+          <div class="srow"><label>Step size η</label><span class="sval" id="etaV">0.30</span></div>
+          <input type="range" id="eta" min="0.05" max="1.0" value="0.30" step="0.05" />
+        </div>
+        <div>
+          <div class="srow"><label>Drift steps</label><span class="sval" id="nsV">30</span></div>
+          <input type="range" id="nsteps" min="5" max="60" value="30" step="5" />
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="showArr" checked />
+          <label for="showArr" style="font-size:12px;color:#666;">Show drift arrows</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+let target=[],base=[],gen=[],trajs=[],drifts=[],kernel='laplace';
+let curStep=0,playing=false,simulated=false,drawMode='target';
+let viewBounds={xmin:-2,xmax:2,ymin:-2,ymax:2};
+const $=id=>document.getElementById(id),vl=id=>parseFloat($(id).value);
+
+function randn(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function toC(x,y,b){const p=30,sx=(W-2*p)/(b.xmax-b.xmin),sy=(H-2*p)/(b.ymax-b.ymin),s=Math.min(sx,sy);return[W/2+(x-(b.xmin+b.xmax)/2)*s,H/2-(y-(b.ymin+b.ymax)/2)*s];}
+function fromC(px,py,b){const p=30,sx=(W-2*p)/(b.xmax-b.xmin),sy=(H-2*p)/(b.ymax-b.ymin),s=Math.min(sx,sy);return[(px-W/2)/s+(b.xmin+b.xmax)/2,-(py-H/2)/s+(b.ymin+b.ymax)/2];}
+function gB(pts){if(!pts.length)return{xmin:-2,xmax:2,ymin:-2,ymax:2};let xn=Infinity,xx=-Infinity,yn=Infinity,yx=-Infinity;for(const p of pts){xn=Math.min(xn,p[0]);xx=Math.max(xx,p[0]);yn=Math.min(yn,p[1]);yx=Math.max(yx,p[1]);}const pad=Math.max(xx-xn,yx-yn)*0.15+0.3;return{xmin:xn-pad,xmax:xx+pad,ymin:yn-pad,ymax:yx+pad};}
+function uC(){$('tCnt').textContent='('+target.length+')';$('bCnt').textContent='('+base.length+')';}
+
+function cDrift(gP,tP,tau){
+  const N=gP.length,M=tP.length,isG=kernel==='gaussian',dr=gP.map(()=>[0,0]);
+  for(let i=0;i<N;i++){
+    const x=gP[i];let mxP=-Infinity,mxN=-Infinity;
+    const lP=new Float64Array(M),lN=new Float64Array(N);
+    for(let j=0;j<M;j++){const dx=tP[j][0]-x[0],dy=tP[j][1]-x[1],d=Math.sqrt(dx*dx+dy*dy+1e-12);lP[j]=isG?-(d*d)/(2*tau*tau):-d/tau;if(lP[j]>mxP)mxP=lP[j];}
+    for(let j=0;j<N;j++){if(j===i){lN[j]=-1e6;continue;}const dx=gP[j][0]-x[0],dy=gP[j][1]-x[1],d=Math.sqrt(dx*dx+dy*dy+1e-12);lN[j]=isG?-(d*d)/(2*tau*tau):-d/tau;if(lN[j]>mxN)mxN=lN[j];}
+    let sP=0,sN=0;for(let j=0;j<M;j++){lP[j]=Math.exp(lP[j]-mxP);sP+=lP[j];}for(let j=0;j<N;j++){lN[j]=Math.exp(lN[j]-mxN);sN+=lN[j];}
+    let vax=0,vay=0,vrx=0,vry=0;
+    for(let j=0;j<M;j++){const w=lP[j]/sP;vax+=w*(tP[j][0]-x[0]);vay+=w*(tP[j][1]-x[1]);}
+    for(let j=0;j<N;j++){const w=lN[j]/sN;vrx+=w*(gP[j][0]-x[0]);vry+=w*(gP[j][1]-x[1]);}
+    dr[i]=[vax-vrx,vay-vry];
+  }return dr;
+}
+
+let initGen=[],playbackTimer=null,playbackToken=0;
+
+function syncSimButton(){
+  $('simBtn').textContent=!simulated?'Simulate':(playing?'Pause':'Play');
+}
+
+function dismissOB(){
+  const el=$('onboard');
+  if(!el||el.classList.contains('gone')) return;
+  el.classList.add('gone');
+  setTimeout(()=>{ el.style.display='none'; }, 350);
+}
+
+$('onboard').addEventListener('click', dismissOB);
+
+function stopPlayback(){
+  playing=false;
+  playbackToken+=1;
+  if(playbackTimer!==null){
+    clearTimeout(playbackTimer);
+    playbackTimer=null;
+  }
+}
+
+function startPlayback(){
+  if(!simulated||playing)return;
+  stopPlayback();
+  playing=true;
+  playbackToken+=1;
+  syncSimButton();
+  animate(playbackToken);
+}
+
+function simulate(){
+  if(target.length<3)return;
+  dismissOB();
+  stopPlayback();
+  const ns=parseInt($('nsteps').value),tau=vl('tau'),eta=vl('eta');
+  if(!simulated||initGen.length===0){
+    if(base.length>=3){initGen=base.map(p=>[...p]);}
+    else{const ng=80,tcx=target.reduce((s,p)=>s+p[0],0)/target.length,tcy=target.reduce((s,p)=>s+p[1],0)/target.length;let sp=0;for(const p of target)sp+=(p[0]-tcx)**2+(p[1]-tcy)**2;sp=Math.sqrt(sp/target.length)*0.8;initGen=[];for(let i=0;i<ng;i++)initGen.push([tcx+randn()*sp,tcy+randn()*sp]);}
+  }
+  gen=initGen.map(p=>[...p]);
+  trajs=[gen.map(p=>[...p])];drifts=[];let cur=gen.map(p=>[...p]);
+  for(let s=0;s<ns;s++){const d=cDrift(cur,target,tau);drifts.push(d);cur=cur.map((p,i)=>[p[0]+eta*d[i][0],p[1]+eta*d[i][1]]);trajs.push(cur.map(p=>[...p]));}
+  simulated=true;curStep=0;$('stepSlider').max=ns;$('stepSlider').value=0;$('stepLabel').textContent='t = 0';
+  draw();
+  startPlayback();
+}
+
+function lerp(a,b,t){return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+const cS=[0.851,0.290,0.290],cE=[0.176,0.549,0.353];
+
+function draw(){
+  const dk=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  ctx.fillStyle=dk?'#1a1a1a':'#ffffff';ctx.fillRect(0,0,W,H);
+  const b=viewBounds;
+  ctx.fillStyle=dk?'rgba(74,144,217,0.3)':'rgba(74,144,217,0.4)';
+  for(const p of target){const[px,py]=toC(p[0],p[1],b);ctx.beginPath();ctx.arc(px,py,3.5,0,Math.PI*2);ctx.fill();}
+  if(!simulated&&base.length>0){ctx.fillStyle=dk?'rgba(217,74,74,0.4)':'rgba(217,74,74,0.5)';for(const p of base){const[px,py]=toC(p[0],p[1],b);ctx.beginPath();ctx.arc(px,py,3.5,0,Math.PI*2);ctx.fill();}}
+  if(!simulated)return;
+  const ns=parseInt($('nsteps').value),frac=curStep/ns,showA=$('showArr').checked;
+  if(curStep>0){ctx.strokeStyle=dk?'rgba(167,139,250,0.15)':'rgba(139,92,246,0.18)';ctx.lineWidth=0.8;for(let i=0;i<gen.length;i++){ctx.beginPath();for(let t=0;t<=curStep;t++){const[px,py]=toC(trajs[t][i][0],trajs[t][i][1],b);t===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}ctx.stroke();}}
+  if(showA&&curStep<drifts.length){const d=drifts[curStep];let mx=0;for(const v of d)mx=Math.max(mx,Math.sqrt(v[0]*v[0]+v[1]*v[1]));const as=Math.min(40,200/(mx+1e-8));for(let i=0;i<trajs[curStep].length;i++){const p=trajs[curStep][i],[px,py]=toC(p[0],p[1],b);const nm=Math.sqrt(d[i][0]**2+d[i][1]**2),al=Math.min(0.7,0.15+0.55*nm/(mx+1e-8));const ex=px+d[i][0]*as,ey=py-d[i][1]*as;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(ex,ey);ctx.strokeStyle=dk?`rgba(200,200,200,${al})`:`rgba(80,80,80,${al})`;ctx.lineWidth=1;ctx.stroke();const ang=Math.atan2(ey-py,ex-px);ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ex-6*Math.cos(ang-0.4),ey-6*Math.sin(ang-0.4));ctx.lineTo(ex-6*Math.cos(ang+0.4),ey-6*Math.sin(ang+0.4));ctx.closePath();ctx.fillStyle=dk?`rgba(200,200,200,${al})`:`rgba(80,80,80,${al})`;ctx.fill();}}
+  const c=lerp(cS,cE,frac),pts=trajs[curStep];
+  for(const p of pts){const[px,py]=toC(p[0],p[1],b);ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fillStyle=`rgba(${Math.round(c[0]*255)},${Math.round(c[1]*255)},${Math.round(c[2]*255)},0.85)`;ctx.fill();ctx.strokeStyle=dk?'rgba(0,0,0,0.3)':'rgba(255,255,255,0.6)';ctx.lineWidth=0.5;ctx.stroke();}
+}
+
+let drawing=false;
+function addPt(e){dismissOB();const r=cv.getBoundingClientRect(),sx=W/r.width,px=(e.clientX-r.left)*sx,py=(e.clientY-r.top)*sx;const[x,y]=fromC(px,py,viewBounds);if(drawMode==='target')target.push([x,y]);else base.push([x,y]);uC();draw();}
+cv.addEventListener('mousedown',e=>{drawing=true;addPt(e);});
+cv.addEventListener('mousemove',e=>{if(drawing)addPt(e);});
+cv.addEventListener('mouseup',()=>drawing=false);
+cv.addEventListener('mouseleave',()=>drawing=false);
+
+function setMode(m){drawMode=m;$('modeTarget').classList.toggle('active',m==='target');$('modeBase').classList.toggle('active',m==='base');$('drawHint').textContent=m==='target'?'Click or drag to draw target points':'Click or drag to draw base (initial) points';}
+$('modeTarget').addEventListener('click',()=>{dismissOB();setMode('target');});
+$('modeBase').addEventListener('click',()=>{dismissOB();setMode('base');});
+
+$('simBtn').addEventListener('click',()=>{
+  if(!simulated){simulate();return;}
+  if(playing){stopPlayback();syncSimButton();return;}
+  startPlayback();
+});
+
+function animate(token){
+  if(!playing||token!==playbackToken)return;
+  const ns=parseInt($('nsteps').value);
+  curStep++;
+  if(curStep>ns){curStep=0;}
+  $('stepSlider').value=curStep;
+  $('stepLabel').textContent='t = '+curStep;
+  draw();
+  playbackTimer=setTimeout(()=>animate(token),120);
+}
+
+$('stepSlider').addEventListener('input',e=>{curStep=parseInt(e.target.value);$('stepLabel').textContent='t = '+curStep;draw();});
+
+$('clearBtn').addEventListener('click',()=>{stopPlayback();target=[];base=[];gen=[];initGen=[];trajs=[];drifts=[];simulated=false;curStep=0;viewBounds={xmin:-2,xmax:2,ymin:-2,ymax:2};syncSimButton();$('stepSlider').value=0;$('stepSlider').max=0;$('stepLabel').textContent='t = 0';uC();draw();});
+
+function mTP(name){
+  target=[];
+  if(name==='moons'){for(let i=0;i<150;i++){const t=Math.PI*i/150;target.push([Math.cos(t)+randn()*0.05,Math.sin(t)+randn()*0.05]);}for(let i=0;i<150;i++){const t=Math.PI*i/150;target.push([1-Math.cos(t)+randn()*0.05,-Math.sin(t)+0.5+randn()*0.05]);}}
+  else if(name==='spiral'){for(let i=0;i<300;i++){const t=3*Math.PI*i/300;target.push([t*Math.cos(t)/10+randn()*0.04,t*Math.sin(t)/10+randn()*0.04]);}}
+  else if(name==='rings'){for(let i=0;i<150;i++){const t=2*Math.PI*i/150;target.push([0.5*Math.cos(t)+randn()*0.03,0.5*Math.sin(t)+randn()*0.03]);}for(let i=0;i<150;i++){const t=2*Math.PI*i/150;target.push([1.2*Math.cos(t)+randn()*0.03,1.2*Math.sin(t)+randn()*0.03]);}}
+  else if(name==='grid'){for(let a=0;a<3;a++)for(let bb=0;bb<3;bb++)for(let k=0;k<25;k++)target.push([a+randn()*0.06,bb+randn()*0.06]);}
+  else if(name==='star'){for(let k=0;k<5;k++){const a1=2*Math.PI*k/5-Math.PI/2,a2=2*Math.PI*((k+2)%5)/5-Math.PI/2,p1=[Math.cos(a1),Math.sin(a1)],p2=[Math.cos(a2),Math.sin(a2)];for(let i=0;i<50;i++){const t=i/50;target.push([p1[0]*(1-t)+p2[0]*t+randn()*0.03,p1[1]*(1-t)+p2[1]*t+randn()*0.03]);}}}
+  else if(name==='scurve'){for(let i=0;i<300;i++){const t=-Math.PI+2*Math.PI*i/300;target.push([Math.sin(t)+randn()*0.04,t/Math.PI+randn()*0.04]);}}
+  stopPlayback();simulated=false;gen=[];initGen=[];trajs=[];drifts=[];curStep=0;
+  viewBounds=gB(target.length?[...target,...base]:[[0,0]]);
+  syncSimButton();$('stepSlider').value=0;$('stepSlider').max=0;$('stepLabel').textContent='t = 0';uC();draw();
+}
+document.querySelectorAll('[data-p]').forEach(b=>b.addEventListener('click',()=>{dismissOB();mTP(b.dataset.p);}));
+
+function mBP(name){
+  base=[];let cx=0,cy=0,sp=1;
+  if(target.length>0){cx=target.reduce((s,p)=>s+p[0],0)/target.length;cy=target.reduce((s,p)=>s+p[1],0)/target.length;let v=0;for(const p of target)v+=(p[0]-cx)**2+(p[1]-cy)**2;sp=Math.sqrt(v/target.length)*0.9;}
+  if(name==='gaussian'){for(let i=0;i<100;i++)base.push([cx+randn()*sp,cy+randn()*sp]);}
+  else if(name==='uniform'){for(let i=0;i<100;i++)base.push([cx+(Math.random()-0.5)*sp*3,cy+(Math.random()-0.5)*sp*3]);}
+  else if(name==='ring'){for(let i=0;i<100;i++){const a=2*Math.PI*i/100;base.push([cx+Math.cos(a)*sp*1.5+randn()*0.05,cy+Math.sin(a)*sp*1.5+randn()*0.05]);}}
+  else if(name==='corners'){const off=sp*1.5;const cs=[[cx-off,cy-off],[cx+off,cy-off],[cx-off,cy+off],[cx+off,cy+off]];for(const c of cs)for(let i=0;i<25;i++)base.push([c[0]+randn()*sp*0.2,c[1]+randn()*sp*0.2]);}
+  stopPlayback();simulated=false;initGen=[];syncSimButton();
+  viewBounds=gB([...target,...base]);
+  uC();draw();
+}
+document.querySelectorAll('[data-b]').forEach(b=>b.addEventListener('click',()=>{dismissOB();mBP(b.dataset.b);}));
+
+function resim(){if(simulated){simulate();}}
+['tau','eta','nsteps'].forEach(id=>{$(id).addEventListener('input',()=>{$(id.charAt(0)==='n'?'nsV':id+'V').textContent=$(id).value;resim();});});
+$('kLap').addEventListener('click',()=>{kernel='laplace';$('kLap').classList.add('active');$('kGau').classList.remove('active');resim();});
+$('kGau').addEventListener('click',()=>{kernel='gaussian';$('kGau').classList.add('active');$('kLap').classList.remove('active');resim();});
+
+uC();
+syncSimButton();
+draw();
+})();
+</script>
+</section>
+
+<section class="section" id="experiments-section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">Experiments</h2>
+        <p class="experiments-intro">
+          We evaluate Drift Q-Learning on D4RL and OGBench across locomotion and manipulation tasks, focusing on
+          multimodality, long-horizon control, and distributional coverage.
+        </p>
+      </div>
+    </div>
+
+    <div class="benchmark-strip">
+      <div class="benchmark-clip">
+        <video autoplay loop muted playsinline preload="metadata">
+          <source src="./static/experiments/ogbench/antmaze-large-navigate-v0_data.mp4" type="video/mp4">
+        </video>
+        <p>AntMaze</p>
+      </div>
+      <div class="benchmark-clip">
+        <video autoplay loop muted playsinline preload="metadata">
+          <source src="./static/experiments/ogbench/humanoidmaze-medium-navigate-v0_data.mp4" type="video/mp4">
+        </video>
+        <p>HumanoidMaze</p>
+      </div>
+      <div class="benchmark-clip">
+        <video autoplay loop muted playsinline preload="metadata">
+          <source src="./static/experiments/ogbench/antsoccer-arena-stitch-v0_data.mp4" type="video/mp4">
+        </video>
+        <p>AntSoccer</p>
+      </div>
+      <div class="benchmark-clip">
+        <video autoplay loop muted playsinline preload="metadata">
+          <source src="./static/experiments/ogbench/cube-quadruple-v0_data_play.mp4" type="video/mp4">
+        </video>
+        <p>Cube</p>
+      </div>
+      <div class="benchmark-clip">
+        <video autoplay loop muted playsinline preload="metadata">
+          <source src="./static/experiments/ogbench/scene-v0_data.mp4" type="video/mp4">
+        </video>
+        <p>Scene</p>
+      </div>
+      <div class="benchmark-clip">
+        <video autoplay loop muted playsinline preload="metadata">
+          <source src="./static/experiments/ogbench/puzzle-4x6-v0_data.mp4" type="video/mp4">
+        </video>
+        <p>Puzzle</p>
+      </div>
+      <div class="benchmark-clip">
+        <video autoplay loop muted playsinline preload="metadata">
+          <source src="./static/experiments/d4rl-pen-human-v2.mp4" type="video/mp4">
+        </video>
+        <p>Pen</p>
+      </div>
+      <div class="benchmark-clip">
+        <video autoplay loop muted playsinline preload="metadata">
+          <source src="./static/experiments/d4rl-door-human-v2.mp4" type="video/mp4">
+        </video>
+        <p>Door</p>
+      </div>
+      <div class="benchmark-clip">
+        <video autoplay loop muted playsinline preload="metadata">
+          <source src="./static/experiments/d4rl-hammer-expert-v2.mp4" type="video/mp4">
+        </video>
+        <p>Hammer</p>
+      </div>
+      <div class="benchmark-clip">
+        <video autoplay loop muted playsinline preload="metadata">
+          <source src="./static/experiments/d4rl-relocate-cloned-v2.mp4" type="video/mp4">
+        </video>
+        <p>Relocate</p>
+      </div>
+    </div>
+
+    <p class="experiment-note">
+      Benchmark media adapted from <a href="https://seohong.me/projects/ogbench/">OGBench</a> and
+      <a href="https://minari.farama.org/">Minari</a>.
+    </p>
+
+    <div class="results-table-wrap">
+      <p class="results-table-title">Offline RL Results</p>
+      <div class="table-container">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th colspan="3">Gaussian</th>
+              <th colspan="3">Diffusion</th>
+              <th colspan="4">Flow</th>
+              <th>Drift</th>
+            </tr>
+            <tr>
+              <th>Task</th>
+              <th>BC</th>
+              <th>IQL</th>
+              <th>ReBRAC</th>
+              <th>IDQL</th>
+              <th>SRPO</th>
+              <th>CAC</th>
+              <th>FAWAC</th>
+              <th>FBRAC</th>
+              <th>IFQL</th>
+              <th>FQL</th>
+              <th>Ours</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="section-row">
+              <td colspan="12">OGBench</td>
+            </tr>
+            <tr>
+              <td>antmaze-large-st</td>
+              <td>11 ± 1</td>
+              <td>53 ± 3</td>
+              <td><strong>81 ± 5</strong></td>
+              <td>21 ± 5</td>
+              <td>11 ± 4</td>
+              <td>33 ± 4</td>
+              <td>6 ± 1</td>
+              <td>60 ± 6</td>
+              <td>28 ± 5</td>
+              <td>79 ± 3</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>antmaze-giant-st</td>
+              <td>0 ± 0</td>
+              <td>4 ± 1</td>
+              <td><strong>26 ± 8</strong></td>
+              <td>0 ± 0</td>
+              <td>0 ± 0</td>
+              <td>0 ± 0</td>
+              <td>0 ± 0</td>
+              <td>4 ± 4</td>
+              <td>3 ± 2</td>
+              <td>9 ± 6</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>humanoidmaze-med-st</td>
+              <td>2 ± 1</td>
+              <td>33 ± 2</td>
+              <td>22 ± 8</td>
+              <td>1 ± 0</td>
+              <td>1 ± 1</td>
+              <td>53 ± 8</td>
+              <td>19 ± 1</td>
+              <td>38 ± 5</td>
+              <td><strong>60 ± 14</strong></td>
+              <td>58 ± 5</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>humanoidmaze-large-st</td>
+              <td>1 ± 0</td>
+              <td>2 ± 1</td>
+              <td>2 ± 1</td>
+              <td>1 ± 0</td>
+              <td>0 ± 0</td>
+              <td>0 ± 0</td>
+              <td>0 ± 0</td>
+              <td>2 ± 0</td>
+              <td><strong>11 ± 2</strong></td>
+              <td>4 ± 2</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>antsoccer-arena-st</td>
+              <td>1 ± 0</td>
+              <td>8 ± 2</td>
+              <td>0 ± 0</td>
+              <td>12 ± 4</td>
+              <td>1 ± 0</td>
+              <td>2 ± 4</td>
+              <td>12 ± 0</td>
+              <td>16 ± 1</td>
+              <td>33 ± 6</td>
+              <td><strong>60 ± 2</strong></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>cube-single-st</td>
+              <td>5 ± 1</td>
+              <td>83 ± 3</td>
+              <td>91 ± 2</td>
+              <td>95 ± 2</td>
+              <td>80 ± 5</td>
+              <td>85 ± 9</td>
+              <td>81 ± 4</td>
+              <td>79 ± 7</td>
+              <td>79 ± 2</td>
+              <td><strong>96 ± 1</strong></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>cube-double-st</td>
+              <td>2 ± 1</td>
+              <td>7 ± 1</td>
+              <td>12 ± 1</td>
+              <td>15 ± 6</td>
+              <td>2 ± 1</td>
+              <td>6 ± 2</td>
+              <td>5 ± 2</td>
+              <td>15 ± 3</td>
+              <td>14 ± 3</td>
+              <td><strong>29 ± 2</strong></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>scene-st</td>
+              <td>5 ± 1</td>
+              <td>28 ± 1</td>
+              <td>41 ± 3</td>
+              <td>46 ± 3</td>
+              <td>20 ± 1</td>
+              <td>40 ± 7</td>
+              <td>30 ± 3</td>
+              <td>45 ± 5</td>
+              <td>30 ± 3</td>
+              <td><strong>56 ± 2</strong></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>puzzle-3x3-st</td>
+              <td>2 ± 0</td>
+              <td>9 ± 1</td>
+              <td>21 ± 1</td>
+              <td>10 ± 2</td>
+              <td>18 ± 1</td>
+              <td>19 ± 0</td>
+              <td>6 ± 2</td>
+              <td>14 ± 4</td>
+              <td>19 ± 1</td>
+              <td><strong>30 ± 1</strong></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>puzzle-4x4-st</td>
+              <td>0 ± 0</td>
+              <td>7 ± 1</td>
+              <td>14 ± 1</td>
+              <td><strong>29 ± 3</strong></td>
+              <td>10 ± 3</td>
+              <td>15 ± 3</td>
+              <td>1 ± 0</td>
+              <td>13 ± 1</td>
+              <td>25 ± 5</td>
+              <td>17 ± 2</td>
+              <td>—</td>
+            </tr>
+            <tr class="section-row">
+              <td colspan="12">D4RL</td>
+            </tr>
+            <tr>
+              <td>antmaze</td>
+              <td>17</td>
+              <td>57</td>
+              <td>78</td>
+              <td>79</td>
+              <td>74</td>
+              <td>30 ± 3</td>
+              <td>44 ± 3</td>
+              <td>64 ± 7</td>
+              <td>65 ± 7</td>
+              <td><strong>84 ± 3</strong></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>adroit</td>
+              <td>48</td>
+              <td>53</td>
+              <td><strong>59</strong></td>
+              <td>52 ± 1</td>
+              <td>51 ± 1</td>
+              <td>43 ± 2</td>
+              <td>48 ± 1</td>
+              <td>50 ± 2</td>
+              <td>52 ± 1</td>
+              <td>52 ± 1</td>
+              <td>—</td>
+            </tr>
+            <tr class="section-row">
+              <td colspan="12">Visual</td>
+            </tr>
+            <tr>
+              <td>manipulation</td>
+              <td>—</td>
+              <td>42 ± 4</td>
+              <td>60 ± 2</td>
+              <td>—</td>
+              <td>—</td>
+              <td>—</td>
+              <td>—</td>
+              <td>22 ± 2</td>
+              <td>50 ± 5</td>
+              <td><strong>65 ± 2</strong></td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="results-table-note">
+        Reported baselines are taken from the comparison table in the current draft. The Drift column will be
+        filled with our final runs.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{driftpolicies2026,
+  author    = {Anonymous Authors},
+  title     = {Drift Policies},
+  journal   = {NeurIPS 2026 Submission},
+  year      = {2026},
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="#abstract-section">
+        <i class="fas fa-file-alt"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/driftpolicy/driftpolicy.github.io">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This site is adapted from the <a href="https://github.com/nerfies/nerfies.github.io">Nerfies project page template</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
