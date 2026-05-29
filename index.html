@@ -104,9 +104,19 @@
             <span class="author-block">Mila - Quebec AI Institute</span>
           </div>
 
+          <div class="affiliation-logos" aria-label="Affiliations">
+            <a class="affiliation-logo mcgill-logo" href="https://www.mcgill.ca/">McGill</a>
+            <a class="affiliation-logo mila-logo" href="https://mila.quebec/">Mila</a>
+          </div>
+
           <div class="is-size-6 publication-authors author-note">
             <span class="author-block">*Equal contribution.</span>
-            <span class="author-block">Corresponding authors: {achraf.elhoussaini, mo.danesh}@mail.mcgill.ca</span>
+            <span class="corresponding-block">
+              Correspondence:
+              <a href="mailto:achraf.elhoussaini@mail.mcgill.ca">achraf.elhoussaini@mail.mcgill.ca</a>
+              <span class="email-separator">/</span>
+              <a href="mailto:mo.danesh@mail.mcgill.ca">mo.danesh@mail.mcgill.ca</a>
+            </span>
           </div>
 
           <div class="column has-text-centered">
@@ -1428,7 +1438,7 @@ draw();
         DriftQL acts in one feedforward pass. It avoids denoising chains, ODE solvers, and distillation while matching the latency profile of one-step policies.
       </p>
       <div class="exp-columns">
-        <div class="latency-table table-container">
+        <div class="latency-table">
           <table class="results-table">
             <thead>
               <tr>
@@ -1438,10 +1448,10 @@ draw();
               </tr>
             </thead>
             <tbody>
-              <tr><td>Diffusion-QL</td><td>\(K \times N_c\)</td><td>No</td></tr>
-              <tr><td>IDQL</td><td>\(K \times N_c\)</td><td>No</td></tr>
+              <tr><td>Diffusion-QL</td><td>K x N<sub>c</sub></td><td>No</td></tr>
+              <tr><td>IDQL</td><td>K x N<sub>c</sub></td><td>No</td></tr>
               <tr><td>FQL</td><td>5-20 (ODE) + 1 (distilled)</td><td>Yes</td></tr>
-              <tr><td>IFQL</td><td>\(K \times N_c\)</td><td>No</td></tr>
+              <tr><td>IFQL</td><td>K x N<sub>c</sub></td><td>No</td></tr>
               <tr><td><strong>DriftQL</strong></td><td><strong>1 (feedforward)</strong></td><td><strong>No</strong></td></tr>
             </tbody>
           </table>

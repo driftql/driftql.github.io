@@ -69,11 +69,15 @@ body {
 }
 
 .publication-title {
-    font-family: 'Google Sans', sans-serif;
+  font-family: 'Google Sans', sans-serif;
+  font-size: clamp(3.15rem, 6.6vw, 4.45rem);
+  font-weight: 800;
+  line-height: 1.05;
+  margin-bottom: 1.05rem;
 }
 
 .publication-authors {
-    font-family: 'Google Sans', sans-serif;
+  font-family: 'Google Sans', sans-serif;
 }
 
 .publication-venue {
@@ -106,20 +110,26 @@ body {
 
 .author-line {
   margin-bottom: 0.25rem;
+  font-size: 1.28rem;
+  line-height: 1.35;
 }
 
 .author-line-secondary {
   margin-top: 0.1rem;
+  font-size: 1.18rem;
 }
 
 .author-note {
   color: #666;
-  margin-top: 0.35rem;
+  margin-top: 0.5rem;
+  font-size: 0.95rem !important;
+  line-height: 1.45;
 }
 
 .affiliation-block {
   color: #333;
-  margin-top: 0.45rem;
+  margin-top: 0.55rem;
+  font-size: 1.08rem !important;
 }
 
 .equal-contrib {
@@ -131,6 +141,57 @@ body {
   font-weight: 700;
 }
 
+.affiliation-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.55rem;
+  margin-bottom: 0.15rem;
+  flex-wrap: wrap;
+}
+
+.affiliation-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 76px;
+  height: 28px;
+  padding: 0 0.7rem;
+  border-radius: 6px;
+  border: 1px solid #d7d7d7;
+  background: #fff;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.affiliation-logo:hover {
+  text-decoration: none !important;
+}
+
+.mcgill-logo {
+  color: #d71920 !important;
+}
+
+.mila-logo {
+  color: #111 !important;
+}
+
+.corresponding-block {
+  display: inline-flex;
+  gap: 0.38rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0.28rem;
+}
+
+.email-separator {
+  color: #aaa;
+}
+
 .publication-banner img {
 }
 
@@ -139,8 +200,8 @@ body {
 }
 
 #abstract-section .content p {
-  font-size: 1.06rem;
-  line-height: 1.68;
+  font-size: 1.2rem;
+  line-height: 1.7;
 }
 
 .publication-video {
@@ -588,10 +649,34 @@ body {
 .latency-table {
   margin-top: 0.7rem;
   margin-bottom: 0.7rem;
+  overflow: visible;
 }
 
 .latency-table table {
-  font-size: 0.94rem;
+  table-layout: fixed;
+  font-size: 0.86rem;
+}
+
+.latency-table .results-table th,
+.latency-table .results-table td {
+  padding: 0.52rem 0.45rem;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.latency-table .results-table th:nth-child(1),
+.latency-table .results-table td:nth-child(1) {
+  width: 32%;
+}
+
+.latency-table .results-table th:nth-child(2),
+.latency-table .results-table td:nth-child(2) {
+  width: 42%;
+}
+
+.latency-table .results-table th:nth-child(3),
+.latency-table .results-table td:nth-child(3) {
+  width: 26%;
 }
 
 .full-results-page {
