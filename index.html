@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="description"
-        content="Drift Policy is a one-step generative policy for offline reinforcement learning built around conditional drift fields.">
+        content="Drift Q-Learning is a one-step generative policy for offline reinforcement learning built around conditional drift fields and critic-driven policy improvement.">
   <meta name="keywords" content="Drift Q-Learning, Offline RL, Diffusion Policies, Flow Matching, Generative Policies">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Drift Policies</title>
+  <title>Drift Q-Learning</title>
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
         rel="stylesheet">
@@ -26,7 +26,9 @@
   <script src="./static/js/bulma-slider.min.js"></script>
   <script>
     window.MathJax = {
+      loader: { load: ['[tex]/color'] },
       tex: {
+        packages: {'[+]': ['color']},
         inlineMath: [['\\(', '\\)'], ['$', '$']],
         displayMath: [['\\[', '\\]']]
       }
@@ -58,17 +60,11 @@
           Navigate
         </a>
         <div class="navbar-dropdown">
-          <a class="navbar-item" href="#animations-section">
-            Animations
-          </a>
           <a class="navbar-item" href="#abstract-section">
             Abstract
           </a>
           <a class="navbar-item" href="#method-section">
-            Algorithm
-          </a>
-          <a class="navbar-item" href="#interactive-demo">
-            Interactive Demo
+            Methodology
           </a>
           <a class="navbar-item" href="#experiments-section">
             Experiments
@@ -89,13 +85,28 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered">
         <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">Drift Policies</h1>
+          <h1 class="title is-1 publication-title">Drift Q-Learning</h1>
           <div class="is-size-5 publication-authors">
-            <span class="author-block">Anonymous Authors</span>
+            <div class="author-line lead-authors">
+              <span class="author-block equal-author"><a href="https://anashoussaini.github.io/">Anas Houssaini</a><span class="equal-contrib">*</span></span>
+              <span class="author-block equal-author"><a href="https://modanesh.github.io/">Mohamad H. Danesh</a><span class="equal-contrib">*</span></span>
+              <span class="author-block"><a href="https://mila.quebec/en/directory/amin-abyaneh">Amin Abyaneh</a></span>
+            </div>
+            <div class="author-line author-line-secondary">
+              <span class="author-block"><a href="https://scholar.google.com/citations?user=1Nk3WZoAAAAJ&hl=en">Scott Fujimoto</a></span>
+              <span class="author-block"><a href="https://sites.google.com/site/hsiuchinlin/">Hsiu-Chin Lin</a></span>
+              <span class="author-block"><a href="https://www.mcgill.ca/cim/meger">David Meger</a></span>
+            </div>
           </div>
 
-          <div class="is-size-5 publication-authors">
-            <span class="author-block">NeurIPS 2026 Submission</span>
+          <div class="is-size-5 publication-authors affiliation-block">
+            <span class="author-block">McGill University</span>
+            <span class="author-block">Mila - Quebec AI Institute</span>
+          </div>
+
+          <div class="is-size-6 publication-authors author-note">
+            <span class="author-block">*Equal contribution.</span>
+            <span class="author-block">Corresponding authors: {achraf.elhoussaini, mo.danesh}@mail.mcgill.ca</span>
           </div>
 
           <div class="column has-text-centered">
@@ -125,52 +136,6 @@
   </div>
 </section>
 
-<section class="section" id="animations-section">
-  <div class="container is-max-desktop">
-    <div class="columns is-multiline animation-grid">
-      <div class="column is-half-tablet is-one-quarter-desktop">
-        <div class="animation-card">
-          <video class="sync-loop" muted loop playsinline preload="auto">
-            <source src="./static/videos/rings.mp4" type="video/mp4">
-          </video>
-          <p>Rings</p>
-        </div>
-      </div>
-      <div class="column is-half-tablet is-one-quarter-desktop">
-        <div class="animation-card">
-          <video class="sync-loop" muted loop playsinline preload="auto">
-            <source src="./static/videos/scurve.mp4" type="video/mp4">
-          </video>
-          <p>S-Curve</p>
-        </div>
-      </div>
-      <div class="column is-half-tablet is-one-quarter-desktop">
-        <div class="animation-card">
-          <video class="sync-loop" muted loop playsinline preload="auto">
-            <source src="./static/videos/spiral.mp4" type="video/mp4">
-          </video>
-          <p>Spiral</p>
-        </div>
-      </div>
-      <div class="column is-half-tablet is-one-quarter-desktop">
-        <div class="animation-card">
-          <video class="sync-loop" muted loop playsinline preload="auto">
-            <source src="./static/videos/star.mp4" type="video/mp4">
-          </video>
-          <p>Star</p>
-        </div>
-      </div>
-    </div>
-    <div class="columns is-centered">
-      <div class="column is-full-width has-text-centered">
-        <p class="section-subtitle">
-          Four 2D targets showing how attraction to data and repulsion between generated particles shape the drift field.
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section class="section" id="abstract-section">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
@@ -178,15 +143,7 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Diffusion and flow policies have emerged as strong generative policies for offline reinforcement
-            learning, but their expressivity typically comes with expensive iterative inference. <strong>Drift
-            Q-Learning</strong> asks whether that cost is actually necessary. Our method trains a one-step stochastic actor with a conditional drift field that pulls generated
-            actions toward the offline data manifold while pushing them away from one another to prevent
-            collapse. Rather than transporting a simple prior to a complex action distribution at test time,
-            Drift Q-Learning amortizes that transport into the generator during training through a simple
-            regression objective. The result is an expressive offline RL policy that requires no denoising schedule, no ODE solver,
-            and no distillation architecture at inference. Across D4RL and OGBench, the goal is to match or
-            exceed strong diffusion and flow-matching baselines while acting in a single forward pass.
+            Offline reinforcement learning requires improving a policy from fixed data while avoiding out-of-distribution actions with unreliable value estimates. Diffusion and flow policies handle this trade-off by modeling the behavior distribution to regularize the RL objective, but they require iterative denoising, solver integrations, and in more efficient variants, distillation or other approximations at inference. We propose <strong>DriftQL</strong>, which combines a drift-based behavioral regularizer with critic-driven policy improvement. The value signal biases the policy toward high-value regions of the data support, while attraction and repulsion together keep generated actions near the data and prevent collapse onto a single mode. DriftQL is implemented as a single network with a unified training objective and generates actions in a <i>single</i> forward pass. On D4RL and OGBench, DriftQL consistently outperforms diffusion and flow methods, advancing the state of the art. Under degraded data quality, where the baselines visibly struggle, DriftQL remains close to its clean-data performance, positioning it as a promising alternative to diffusion and flow-based methods while maintaining the simplicity and efficiency of deterministic approaches.
           </p>
         </div>
       </div>
@@ -200,18 +157,22 @@
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths">
-        <h2 class="title is-2">Algorithm</h2>
+        <h2 class="title is-2">Methodology</h2>
       </div>
     </div>
 
+    <figure class="paper-figure-wrap method-overview">
+      <img class="paper-figure" src="./static/paper/method_fig.png" alt="Overview of DriftQL">
+      <figcaption class="figure-caption">
+        <strong>Overview of DriftQL.</strong> For each dataset state, the actor samples several candidate actions. A <span class="term-blue">single-positive attraction</span> pulls them toward the dataset action, while <span class="term-red">sample repulsion</span> keeps the candidates from collapsing. The actor is then updated with both the drift loss and the critic objective.
+      </figcaption>
+    </figure>
+
     <div class="columns is-centered has-text-centered how-it-works-math-intro" style="padding-top: 1.5rem;">
       <div class="column is-four-fifths">
-        <h3 class="title is-3">The Math</h3>
-        <div class="content has-text-justified">
+        <div class="content has-text-justified method-lede">
           <p>
-            The core object in Drift Q-Learning is a state-conditional drift field over actions. For each
-            state, generated actions are pulled toward the observed dataset action and pushed away from one
-            another. This gives a geometrically meaningful alternative to scalar behavior-cloning penalties.
+            DriftQL uses a stochastic actor \(a = f_\theta(s, \epsilon)\). For each state, the actor produces \(N\) candidate actions \(\hat{a}_i\), and the drift field gives each candidate a one-step training target.
           </p>
         </div>
       </div>
@@ -219,52 +180,37 @@
 
     <div class="columns">
       <div class="column">
-        <div class="equation-panel">
-          <h3 class="title is-4">Pairwise geometry</h3>
+        <div class="equation-panel method-accent-blue">
+          <h3 class="title is-4">Attraction</h3>
           <div class="content has-text-justified">
             <p>
-              For a state \(s\), let \(a^+\) be the dataset action and let \(\{\hat{a}_i\}_{i=1}^{N}\)
-              be actions sampled from the current policy. Distances to the positive action and to other
-              generated actions are normalized by action dimension:
+              Offline RL supplies one dataset action \(a^+\) for the sampled state, so the attraction term is a direct pull to that action:
             </p>
           </div>
           <div class="equation-block">
             \[
-              d^+_{i} = \frac{\|\hat{a}_i - a^+\|_2}{\sqrt{d_a}},
-              \qquad
-              d^-_{ik} = \frac{\|\hat{a}_i - \hat{a}_k\|_2}{\sqrt{d_a}}.
+              {\color{#2e6fe6}V^+(\hat{a}_i)} = a^+ - \hat{a}_i.
             \]
-          </div>
-          <div class="content has-text-justified">
-            <p>
-              These distances are converted into Laplace or Gaussian kernel weights, giving a local notion
-              of which data points and generated particles should matter most for each sample.
-            </p>
           </div>
         </div>
       </div>
 
       <div class="column">
-        <div class="equation-panel">
-          <h3 class="title is-4">The drift vector</h3>
+        <div class="equation-panel method-accent-red">
+          <h3 class="title is-4">Repulsion</h3>
           <div class="content has-text-justified">
             <p>
-              The drift is the difference between an attraction term and a repulsion term:
+              The other generated actions estimate the current policy distribution and produce a repulsive correction:
             </p>
           </div>
           <div class="equation-block">
             \[
-              V_i =
-              \underbrace{(a^+ - \hat{a}_i)}_{\text{attraction}}
-              -
-              \underbrace{\sum_{k \neq i} w^-_{ik} (\hat{a}_k - \hat{a}_i)}_{\text{repulsion}}.
+              {\color{#ed1b2f}V^-(\hat{a}_i)} =
+              \sum_{k \neq i} {\color{#ed1b2f}w^-_{ik}}\,(\hat{a}_k - \hat{a}_i),
+              \qquad
+              {\color{#ed1b2f}\ell^-_{ik}} =
+              -\frac{\|\hat{a}_i - \hat{a}_k\|_2^2}{2\tau^2 d_a}.
             \]
-          </div>
-          <div class="content has-text-justified">
-            <p>
-              Attraction keeps the actor tied to the offline support. Repulsion prevents the generated
-              distribution from collapsing to a single mode.
-            </p>
           </div>
         </div>
       </div>
@@ -272,35 +218,26 @@
 
     <div class="columns is-centered">
       <div class="column is-full-width">
-        <div class="equation-panel">
-          <h3 class="title is-4">Amortized drift regression</h3>
+        <div class="equation-panel method-accent-orange">
+          <h3 class="title is-4">Drift-Regularized Policy Improvement</h3>
           <div class="content has-text-justified">
             <p>
-              Instead of simulating a long inference chain, the actor is trained to regress toward a
-              drift-corrected target at each update:
+              The net drift combines support preservation with diversity. The actor minimizes this drift loss together with a critic-driven improvement term:
             </p>
           </div>
           <div class="equation-block">
             \[
-              \tilde{V}_i = \frac{V_i}{\lambda + \varepsilon},
+              V(\hat{a}_i) =
+              {\color{#2e6fe6}V^+(\hat{a}_i)} -
+              {\color{#ed1b2f}V^-(\hat{a}_i)},
               \qquad
-              \mathcal{L}_{\mathrm{drift}}(\theta)
-              =
-              \frac{1}{N}
-              \sum_{i=1}^{N}
-              \left\|
-                \hat{a}_i -
-                \operatorname{sg}
-                \left(
-                  \operatorname{clip}(\hat{a}_i + \tilde{V}_i, -1, 1)
-                \right)
-              \right\|^2.
+              \mathcal{L}_{\mathrm{actor}}(\theta) =
+              \alpha\,\mathcal{L}_{\mathrm{drift}}(\theta) + \mathcal{L}_Q(\theta).
             \]
           </div>
           <div class="content has-text-justified">
             <p>
-              This is the core one-step idea: transport is pushed into training, so inference only needs a
-              single actor forward pass rather than iterative denoising or ODE integration.
+              At test time, DriftQL samples an action with one actor forward pass. There is no denoising chain, ODE solver, or distillation network.
             </p>
           </div>
         </div>
@@ -309,6 +246,7 @@
   </div>
 </section>
 
+<template id="disabled-anim-section">
 <div id="anim-section" style="margin-bottom: 2.5rem;">
 <style>
   #anim-section canvas {
@@ -656,6 +594,7 @@ document.addEventListener('keydown',e=>{
 });
 })();
 </script>
+</template>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -666,15 +605,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const methodSection = document.getElementById('method-section');
-  const methodContainer = methodSection && methodSection.querySelector('.container.is-max-desktop');
   const animSection = document.getElementById('anim-section');
-  const mathIntro = methodSection && methodSection.querySelector('.how-it-works-math-intro');
-  if (methodContainer && animSection && mathIntro && animSection.parentElement !== methodContainer) {
-    methodContainer.insertBefore(animSection, mathIntro);
+  if (methodSection && animSection && methodSection.nextElementSibling !== animSection) {
+    methodSection.insertAdjacentElement('afterend', animSection);
   }
 });
 </script>
 
+<template id="disabled-interactive-demo">
 <section class="section" id="interactive-demo">
 <style>
   #drift-demo * { box-sizing: border-box; }
@@ -1126,6 +1064,7 @@ draw();
 })();
 </script>
 </section>
+</template>
 
 <section class="section" id="experiments-section">
   <div class="container is-max-desktop">
@@ -1133,8 +1072,7 @@ draw();
       <div class="column is-four-fifths">
         <h2 class="title is-2">Experiments</h2>
         <p class="experiments-intro">
-          We evaluate Drift Q-Learning on D4RL and OGBench across locomotion and manipulation tasks, focusing on
-          multimodality, long-horizon control, and distributional coverage.
+          We evaluate DriftQL on D4RL and OGBench, covering locomotion, navigation, manipulation, multimodal behavior, and sparse-reward long-horizon tasks. We compare against Gaussian-policy methods (BC, IQL, ReBRAC), diffusion policies (IDQL, SRPO, CAC), and flow policies (FAWAC, FBRAC, IFQL, FQL).
         </p>
       </div>
     </div>
@@ -1203,12 +1141,21 @@ draw();
     </div>
 
     <p class="experiment-note">
-      Benchmark media adapted from <a href="https://seohong.me/projects/ogbench/">OGBench</a> and
+      Environment media adapted from <a href="https://seohong.me/projects/ogbench/">OGBench</a> and
       <a href="https://minari.farama.org/">Minari</a>.
     </p>
 
+    <div class="exp-section">
+      <p class="exp-section-title">Training and Evaluation</p>
+      <p class="exp-section-desc">
+        DriftQL is trained for 1M gradient steps on state-based OGBench tasks and 500K steps on D4RL tasks, with evaluation every 100K steps. OGBench reports the average over the last three checkpoints; D4RL reports the final checkpoint. Results are averaged over 8 seeds.
+      </p>
+    </div>
+
     <div class="results-table-wrap">
-      <p class="results-table-title">Offline RL Results</p>
+      <p class="exp-section-desc">
+        Environment-level averages are shown below. OGBench uses success rates, and D4RL uses normalized scores.
+      </p>
       <div class="table-container">
         <table class="results-table">
           <thead>
@@ -1231,158 +1178,15 @@ draw();
               <th>FBRAC</th>
               <th>IFQL</th>
               <th>FQL</th>
-              <th>Ours</th>
+              <th class="ours-col">DriftQL</th>
             </tr>
           </thead>
           <tbody>
             <tr class="section-row">
-              <td colspan="12">OGBench</td>
-            </tr>
-            <tr>
-              <td>antmaze-large-st</td>
-              <td>11 ± 1</td>
-              <td>53 ± 3</td>
-              <td><strong>81 ± 5</strong></td>
-              <td>21 ± 5</td>
-              <td>11 ± 4</td>
-              <td>33 ± 4</td>
-              <td>6 ± 1</td>
-              <td>60 ± 6</td>
-              <td>28 ± 5</td>
-              <td>79 ± 3</td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>antmaze-giant-st</td>
-              <td>0 ± 0</td>
-              <td>4 ± 1</td>
-              <td><strong>26 ± 8</strong></td>
-              <td>0 ± 0</td>
-              <td>0 ± 0</td>
-              <td>0 ± 0</td>
-              <td>0 ± 0</td>
-              <td>4 ± 4</td>
-              <td>3 ± 2</td>
-              <td>9 ± 6</td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>humanoidmaze-med-st</td>
-              <td>2 ± 1</td>
-              <td>33 ± 2</td>
-              <td>22 ± 8</td>
-              <td>1 ± 0</td>
-              <td>1 ± 1</td>
-              <td>53 ± 8</td>
-              <td>19 ± 1</td>
-              <td>38 ± 5</td>
-              <td><strong>60 ± 14</strong></td>
-              <td>58 ± 5</td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>humanoidmaze-large-st</td>
-              <td>1 ± 0</td>
-              <td>2 ± 1</td>
-              <td>2 ± 1</td>
-              <td>1 ± 0</td>
-              <td>0 ± 0</td>
-              <td>0 ± 0</td>
-              <td>0 ± 0</td>
-              <td>2 ± 0</td>
-              <td><strong>11 ± 2</strong></td>
-              <td>4 ± 2</td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>antsoccer-arena-st</td>
-              <td>1 ± 0</td>
-              <td>8 ± 2</td>
-              <td>0 ± 0</td>
-              <td>12 ± 4</td>
-              <td>1 ± 0</td>
-              <td>2 ± 4</td>
-              <td>12 ± 0</td>
-              <td>16 ± 1</td>
-              <td>33 ± 6</td>
-              <td><strong>60 ± 2</strong></td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>cube-single-st</td>
-              <td>5 ± 1</td>
-              <td>83 ± 3</td>
-              <td>91 ± 2</td>
-              <td>95 ± 2</td>
-              <td>80 ± 5</td>
-              <td>85 ± 9</td>
-              <td>81 ± 4</td>
-              <td>79 ± 7</td>
-              <td>79 ± 2</td>
-              <td><strong>96 ± 1</strong></td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>cube-double-st</td>
-              <td>2 ± 1</td>
-              <td>7 ± 1</td>
-              <td>12 ± 1</td>
-              <td>15 ± 6</td>
-              <td>2 ± 1</td>
-              <td>6 ± 2</td>
-              <td>5 ± 2</td>
-              <td>15 ± 3</td>
-              <td>14 ± 3</td>
-              <td><strong>29 ± 2</strong></td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>scene-st</td>
-              <td>5 ± 1</td>
-              <td>28 ± 1</td>
-              <td>41 ± 3</td>
-              <td>46 ± 3</td>
-              <td>20 ± 1</td>
-              <td>40 ± 7</td>
-              <td>30 ± 3</td>
-              <td>45 ± 5</td>
-              <td>30 ± 3</td>
-              <td><strong>56 ± 2</strong></td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>puzzle-3x3-st</td>
-              <td>2 ± 0</td>
-              <td>9 ± 1</td>
-              <td>21 ± 1</td>
-              <td>10 ± 2</td>
-              <td>18 ± 1</td>
-              <td>19 ± 0</td>
-              <td>6 ± 2</td>
-              <td>14 ± 4</td>
-              <td>19 ± 1</td>
-              <td><strong>30 ± 1</strong></td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>puzzle-4x4-st</td>
-              <td>0 ± 0</td>
-              <td>7 ± 1</td>
-              <td>14 ± 1</td>
-              <td><strong>29 ± 3</strong></td>
-              <td>10 ± 3</td>
-              <td>15 ± 3</td>
-              <td>1 ± 0</td>
-              <td>13 ± 1</td>
-              <td>25 ± 5</td>
-              <td>17 ± 2</td>
-              <td>—</td>
-            </tr>
-            <tr class="section-row">
               <td colspan="12">D4RL</td>
             </tr>
             <tr>
-              <td>antmaze</td>
+              <td>antmaze (6)</td>
               <td>17</td>
               <td>57</td>
               <td>78</td>
@@ -1393,10 +1197,10 @@ draw();
               <td>64 ± 7</td>
               <td>65 ± 7</td>
               <td><strong>84 ± 3</strong></td>
-              <td>—</td>
+              <td class="ours-col ours-best"><strong>84 ± 9</strong></td>
             </tr>
             <tr>
-              <td>adroit</td>
+              <td>adroit (12)</td>
               <td>48</td>
               <td>53</td>
               <td><strong>59</strong></td>
@@ -1407,32 +1211,261 @@ draw();
               <td>50 ± 2</td>
               <td>52 ± 1</td>
               <td>52 ± 1</td>
-              <td>—</td>
-            </tr>
-            <tr class="section-row">
-              <td colspan="12">Visual</td>
+              <td class="ours-col">50 ± 5</td>
             </tr>
             <tr>
-              <td>manipulation</td>
-              <td>—</td>
-              <td>42 ± 4</td>
+              <td>locomotion (9)</td>
+              <td>50</td>
+              <td>82</td>
+              <td><strong>90</strong></td>
+              <td>82</td>
+              <td><strong>87</strong></td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>50 ± 3</td>
+              <td>63 ± 2</td>
+              <td class="ours-col">81 ± 23</td>
+            </tr>
+            <tr>
+              <td><strong>D4RL Overall</strong></td>
+              <td>38</td>
+              <td>64</td>
+              <td><strong>76</strong></td>
+              <td>71 ± 1</td>
+              <td>71 ± 1</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>56 ± 9</td>
+              <td>66 ± 1</td>
+              <td class="ours-col ours-near"><strong>72 ± 2</strong></td>
+            </tr>
+            <tr class="section-row">
+              <td colspan="12">OGBench</td>
+            </tr>
+            <tr>
+              <td>antmaze-large-st (5)</td>
+              <td>11 ± 1</td>
+              <td>53 ± 3</td>
+              <td>81 ± 5</td>
+              <td>21 ± 5</td>
+              <td>11 ± 4</td>
+              <td>33 ± 4</td>
+              <td>6 ± 1</td>
+              <td>60 ± 6</td>
+              <td>28 ± 5</td>
+              <td>79 ± 3</td>
+              <td class="ours-col ours-best"><strong>92 ± 4</strong></td>
+            </tr>
+            <tr>
+              <td>antmaze-giant-st (5)</td>
+              <td>0 ± 0</td>
+              <td>4 ± 1</td>
+              <td>26 ± 8</td>
+              <td>0 ± 0</td>
+              <td>0 ± 0</td>
+              <td>0 ± 0</td>
+              <td>0 ± 0</td>
+              <td>4 ± 4</td>
+              <td>3 ± 2</td>
+              <td>9 ± 6</td>
+              <td class="ours-col ours-best"><strong>60 ± 2</strong></td>
+            </tr>
+            <tr>
+              <td>humanoidmaze-med-st (5)</td>
+              <td>2 ± 1</td>
+              <td>33 ± 2</td>
+              <td>22 ± 8</td>
+              <td>1 ± 0</td>
+              <td>1 ± 1</td>
+              <td>53 ± 8</td>
+              <td>19 ± 1</td>
+              <td>38 ± 5</td>
+              <td><strong>60 ± 1</strong></td>
+              <td>58 ± 5</td>
+              <td class="ours-col ours-best"><strong>62 ± 2</strong></td>
+            </tr>
+            <tr>
+              <td>humanoidmaze-large-st (5)</td>
+              <td>1 ± 0</td>
+              <td>2 ± 1</td>
+              <td>2 ± 1</td>
+              <td>1 ± 0</td>
+              <td>0 ± 0</td>
+              <td>0 ± 0</td>
+              <td>0 ± 0</td>
+              <td>2 ± 0</td>
+              <td><strong>11 ± 2</strong></td>
+              <td>4 ± 2</td>
+              <td class="ours-col">5 ± 8</td>
+            </tr>
+            <tr>
+              <td>antsoccer-arena-st (5)</td>
+              <td>1 ± 0</td>
+              <td>8 ± 2</td>
+              <td>0 ± 0</td>
+              <td>12 ± 4</td>
+              <td>1 ± 0</td>
+              <td>2 ± 4</td>
+              <td>12 ± 0</td>
+              <td>16 ± 1</td>
+              <td>33 ± 6</td>
               <td>60 ± 2</td>
-              <td>—</td>
-              <td>—</td>
-              <td>—</td>
-              <td>—</td>
-              <td>22 ± 2</td>
-              <td>50 ± 5</td>
-              <td><strong>65 ± 2</strong></td>
-              <td>—</td>
+              <td class="ours-col ours-best"><strong>65 ± 2</strong></td>
+            </tr>
+            <tr>
+              <td>cube-single-st (5)</td>
+              <td>5 ± 1</td>
+              <td>83 ± 3</td>
+              <td>91 ± 2</td>
+              <td><strong>95 ± 2</strong></td>
+              <td>80 ± 5</td>
+              <td>85 ± 9</td>
+              <td>81 ± 4</td>
+              <td>79 ± 7</td>
+              <td>79 ± 2</td>
+              <td><strong>96 ± 1</strong></td>
+              <td class="ours-col ours-near"><strong>94 ± 3</strong></td>
+            </tr>
+            <tr>
+              <td>cube-double-st (5)</td>
+              <td>2 ± 1</td>
+              <td>7 ± 1</td>
+              <td>12 ± 1</td>
+              <td>15 ± 6</td>
+              <td>2 ± 1</td>
+              <td>6 ± 2</td>
+              <td>5 ± 2</td>
+              <td>15 ± 3</td>
+              <td>14 ± 3</td>
+              <td><strong>29 ± 2</strong></td>
+              <td class="ours-col">25 ± 2</td>
+            </tr>
+            <tr>
+              <td>scene-st (5)</td>
+              <td>5 ± 1</td>
+              <td>28 ± 1</td>
+              <td>41 ± 3</td>
+              <td>46 ± 3</td>
+              <td>20 ± 1</td>
+              <td>40 ± 7</td>
+              <td>30 ± 3</td>
+              <td>45 ± 5</td>
+              <td>30 ± 3</td>
+              <td>56 ± 2</td>
+              <td class="ours-col ours-best"><strong>74 ± 4</strong></td>
+            </tr>
+            <tr>
+              <td>puzzle-3x3-st (5)</td>
+              <td>2 ± 0</td>
+              <td>9 ± 1</td>
+              <td>21 ± 1</td>
+              <td>10 ± 2</td>
+              <td>18 ± 1</td>
+              <td>19 ± 0</td>
+              <td>6 ± 2</td>
+              <td>14 ± 4</td>
+              <td>19 ± 1</td>
+              <td>30 ± 1</td>
+              <td class="ours-col ours-best"><strong>35 ± 3</strong></td>
+            </tr>
+            <tr>
+              <td>puzzle-4x4-st (5)</td>
+              <td>0 ± 0</td>
+              <td>7 ± 1</td>
+              <td>14 ± 1</td>
+              <td><strong>29 ± 3</strong></td>
+              <td>10 ± 3</td>
+              <td>15 ± 3</td>
+              <td>1 ± 0</td>
+              <td>13 ± 1</td>
+              <td>25 ± 5</td>
+              <td>17 ± 2</td>
+              <td class="ours-col ours-near"><strong>27 ± 3</strong></td>
+            </tr>
+            <tr>
+              <td><strong>OGBench Overall</strong></td>
+              <td>3 ± 0</td>
+              <td>23 ± 1</td>
+              <td>31 ± 1</td>
+              <td>23 ± 1</td>
+              <td>14 ± 1</td>
+              <td>25 ± 2</td>
+              <td>16 ± 1</td>
+              <td>29 ± 1</td>
+              <td>30 ± 1</td>
+              <td>44 ± 1</td>
+              <td class="ours-col ours-best"><strong>54 ± 1</strong></td>
             </tr>
           </tbody>
         </table>
       </div>
       <p class="results-table-note">
-        Reported baselines are taken from the comparison table in the current draft. The Drift column will be
-        filled with our final runs.
+        Values at or above 95% of the best performance in each row are bolded. Standard deviations are shown after ± where available.
       </p>
+      <div class="experiment-actions">
+        <a class="button is-normal is-light full-table-button" href="./full-results.html">
+          <span class="icon"><i class="fas fa-table"></i></span>
+          <span>View full per-task table</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="exp-section">
+      <p class="exp-section-title">Robustness Under Corrupted Offline Data</p>
+      <p class="exp-section-desc">
+        We corrupt the default OGBench cube-single and antmaze-large datasets by replacing a fraction of actions with uniformly random actions, then average success over the 800k, 900k, and 1M checkpoints. DriftQL stays strong as random-action corruption increases from p = 0.20 to p = 0.40. On Cube, it is strongest at every corruption level. On AntMaze, it degrades more gracefully and becomes strongest at p = 0.40.
+      </p>
+      <figure class="paper-figure-wrap compact">
+        <img class="paper-figure" src="./static/paper/corruption.png" alt="Robustness under random-action corruption">
+      </figure>
+    </div>
+
+    <div class="exp-section">
+      <p class="exp-section-title">Computational Efficiency and Inference Latency</p>
+      <p class="exp-section-desc">
+        DriftQL acts in one feedforward pass. It avoids denoising chains, ODE solvers, and distillation while matching the latency profile of one-step policies.
+      </p>
+      <div class="exp-columns">
+        <div class="latency-table table-container">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Sequential NFEs</th>
+                <th>Distillation required</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Diffusion-QL</td><td>\(K \times N_c\)</td><td>No</td></tr>
+              <tr><td>IDQL</td><td>\(K \times N_c\)</td><td>No</td></tr>
+              <tr><td>FQL</td><td>5-20 (ODE) + 1 (distilled)</td><td>Yes</td></tr>
+              <tr><td>IFQL</td><td>\(K \times N_c\)</td><td>No</td></tr>
+              <tr><td><strong>DriftQL</strong></td><td><strong>1 (feedforward)</strong></td><td><strong>No</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <figure class="paper-figure-wrap compact">
+          <img class="paper-figure" src="./static/paper/latency_total.png" alt="Training time and inference latency">
+          <figcaption class="figure-caption">
+            Training time and inference latency on the default antmaze-large-st task.
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="exp-section">
+      <p class="exp-section-title">Ablation Study</p>
+      <p class="exp-section-desc">
+        We ablate the main DriftQL hyperparameters on antmaze-large-navigate and cube-single-play, changing one setting at a time relative to the tuned defaults.
+      </p>
+      <figure class="paper-figure-wrap compact">
+        <img class="paper-figure" src="./static/paper/ablation_combined.png" alt="Ablation study of DriftQL hyperparameters">
+        <figcaption class="figure-caption">
+          <strong>Ablation study.</strong> Success rates across training for \(\alpha\), drift temperature \(\tau\), kernel type, noise dimension, and number of generated actions \(N\).
+        </figcaption>
+      </figure>
     </div>
 
   </div>
@@ -1441,10 +1474,10 @@ draw();
 <section class="section" id="BibTeX">
   <div class="container is-max-desktop content">
     <h2 class="title">BibTeX</h2>
-    <pre><code>@article{driftpolicies2026,
-  author    = {Anonymous Authors},
-  title     = {Drift Policies},
-  journal   = {NeurIPS 2026 Submission},
+    <pre><code>@article{driftql2026,
+  author    = {Houssaini, Anas and Danesh, Mohamad H. and Abyaneh, Amin and Fujimoto, Scott and Lin, Hsiu-Chin and Meger, David},
+  title     = {Drift Q-Learning},
+  journal   = {Preprint},
   year      = {2026},
 }</code></pre>
   </div>
