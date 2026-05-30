@@ -223,6 +223,21 @@ body {
   line-height: 1.7;
 }
 
+#driftql-animation-section {
+  background: #fff;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.driftql-top-animation {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #fff;
+  border: 0;
+  border-radius: 0;
+}
+
 .publication-video {
     position: relative;
     width: 100%;
