@@ -59,11 +59,12 @@
     </a>
   </div>
   <div class="navbar-menu">
-    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
-      <a class="navbar-item" href="#">
-      <span class="icon">
-          <i class="fas fa-home"></i>
-      </span>
+    <div class="navbar-start">
+      <a class="navbar-item" href="#" aria-label="Back to top">
+        <span class="icon">
+            <i class="fas fa-home"></i>
+        </span>
+        <span>Home</span>
       </a>
 
       <div class="navbar-item has-dropdown is-hoverable">
@@ -72,7 +73,7 @@
         </a>
         <div class="navbar-dropdown">
           <a class="navbar-item" href="#abstract-section">
-            Abstract
+            Intuition
           </a>
           <a class="navbar-item" href="#method-section">
             Methodology
@@ -120,13 +121,7 @@
           </div>
 
           <div class="is-size-6 publication-authors author-note">
-            <div>*Equal contribution.</div>
-            <span class="corresponding-block">
-              Correspondence:
-              <a href="mailto:achraf.elhoussaini@mail.mcgill.ca">achraf.elhoussaini@mail.mcgill.ca</a>
-              <span class="email-separator">,</span>
-              <a href="mailto:mo.danesh@mail.mcgill.ca">mo.danesh@mail.mcgill.ca</a>
-            </span>
+            <div>*Equal contribution</div>
           </div>
 
           <div class="column has-text-centered">
@@ -168,6 +163,9 @@
           <source src="./static/animations/driftql_manim/driftql_manim_4step_white.webm" type="video/webm">
           <source src="./static/animations/driftql_manim/driftql_manim_4step_white.mp4" type="video/mp4">
         </video>
+        <p class="driftql-top-caption">
+          DriftQL combines a drift-based behavioral regularizer with critic-driven policy improvement step to introduce a new state of the art that requires no iterative denoising, solvers, and distillation.
+        </p>
       </div>
     </div>
   </div>
@@ -176,11 +174,27 @@
 <section class="section" id="abstract-section">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-3">Abstract</h2>
-        <div class="content has-text-justified">
+      <div class="column">
+        <h2 class="title is-3">Intuition</h2>
+        <div class="content has-text-left intuition-content">
           <p>
-            Offline reinforcement learning requires improving a policy from fixed data while avoiding out-of-distribution actions with unreliable value estimates. Diffusion and flow policies handle this trade-off by modeling the behavior distribution to regularize the RL objective, but they require iterative denoising, solver integrations, and in more efficient variants, distillation or other approximations at inference. We propose <strong>DriftQL</strong>, which combines a drift-based behavioral regularizer with critic-driven policy improvement. The value signal biases the policy toward high-value regions of the data support, while attraction and repulsion together keep generated actions near the data and prevent collapse onto a single mode. DriftQL is implemented as a single network with a unified training objective and generates actions in a <i>single</i> forward pass. On D4RL and OGBench, DriftQL consistently outperforms diffusion and flow methods, advancing the state of the art. Under degraded data quality, where the baselines visibly struggle, DriftQL remains close to its clean-data performance, positioning it as a promising alternative to diffusion and flow-based methods while maintaining the simplicity and efficiency of deterministic approaches.
+            Imagine you want to learn to drive, but only by watching dashcam clips and a sparse reward signal. That's (roughly) <strong>offline reinforcement learning</strong>: improve a policy from fixed data, no exploration allowed.
+          </p>
+          <p>
+            <strong>But what's the catch?</strong> If your policy invents an action nobody in the dataset ever tried, you have no way of knowing whether it's brilliant or catastrophic. Modern methods stay safe by carefully modeling <em>what actions appear in the data</em> and keeping the policy close to that. Diffusion and flow policies do this beautifully, but every new action costs a denoising chain, an ODE solver, or a distilled shortcut.
+          </p>
+          <p>
+            <strong>DriftQL takes a simpler path.</strong> It learns a <strong>drift field</strong>: at every point in training, a single vector, shaped by two forces, that chases the data distribution without collapsing onto a single mode. These forces are:
+          </p>
+          <ul class="intuition-list">
+            <li><span class="term-blue">Attraction</span> pulls candidate actions toward the data, staying where it's safe.</li>
+            <li><span class="term-red">Repulsion</span> pushes candidates apart, so they don't all collapse onto one point.</li>
+          </ul>
+          <p>
+            The critic adds the missing ingredient by tilting the objective toward higher-value actions. <strong>So drift keeps things in-distribution; value picks the good parts of it.</strong>
+          </p>
+          <p>
+            The result is one forward pass to generate an action. No denoising chain, no ODE solver, no distillation network. And when the data gets noisy (imagine half those dashcam clips were filmed by bad drivers), DriftQL barely loses ground while diffusion and flow methods stumble.
           </p>
         </div>
       </div>
@@ -193,20 +207,22 @@
 <section class="section" id="method-section">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
+      <div class="column">
         <h2 class="title is-3">Methodology</h2>
+        <div class="content has-text-justified method-overview-lede">
+          <p>
+            For each dataset state, the actor samples several candidate actions. A <span class="term-blue">single-positive attraction</span> pulls them toward the dataset action, while <span class="term-red">sample repulsion</span> keeps the candidates from collapsing. The actor is then updated with both the drift loss and the critic objective.
+          </p>
+        </div>
       </div>
     </div>
 
     <figure class="paper-figure-wrap method-overview">
       <img class="paper-figure" src="./static/paper/method_fig.png" alt="Overview of DriftQL">
-      <figcaption class="figure-caption">
-        <strong>Overview of DriftQL.</strong> For each dataset state, the actor samples several candidate actions. A <span class="term-blue">single-positive attraction</span> pulls them toward the dataset action, while <span class="term-red">sample repulsion</span> keeps the candidates from collapsing. The actor is then updated with both the drift loss and the critic objective.
-      </figcaption>
     </figure>
 
     <div class="columns is-centered has-text-centered how-it-works-math-intro" style="padding-top: 1.5rem;">
-      <div class="column is-four-fifths">
+      <div class="column">
         <div class="content has-text-justified method-lede">
           <p>
             DriftQL uses a stochastic actor \(a = f_\theta(s, \epsilon)\). For each state, the actor produces \(N\) candidate actions \(\hat{a}_i\), and the drift field gives each candidate a one-step training target.
@@ -256,7 +272,7 @@
     <div class="columns is-centered">
       <div class="column is-full-width">
         <div class="equation-panel method-accent-orange">
-          <h3 class="title is-4">Drift-Regularized Policy Improvement</h3>
+          <h3 class="title is-4">Drift-regularized policy improvement</h3>
           <div class="content has-text-justified">
             <p>
               The net drift combines support preservation with diversity. The actor minimizes this drift loss together with a critic-driven improvement term:
@@ -277,6 +293,16 @@
               At test time, DriftQL samples an action with one actor forward pass. There is no denoising chain, ODE solver, or distillation network.
             </p>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="columns is-centered">
+      <div class="column">
+        <div class="content has-text-left method-outro">
+          <p>
+            And that is the whole recipe. One network, one loss, one feedforward call. The <span class="term-blue">attraction</span> and <span class="term-red">repulsion</span> keep the policy faithful to the data, the critic steers it toward the parts that pay off, and the heavy machinery of denoising chains, ODE solvers, and distillation networks simply falls away.
+          </p>
         </div>
       </div>
     </div>
@@ -1106,7 +1132,7 @@ draw();
 <section class="section" id="experiments-section">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
+      <div class="column">
         <h2 class="title is-3">Experiments</h2>
         <p class="experiments-intro">
           We evaluate DriftQL on D4RL and OGBench, covering locomotion, navigation, manipulation, multimodal behavior, and sparse-reward long-horizon tasks. We compare against Gaussian-policy methods (BC, IQL, ReBRAC), diffusion policies (IDQL, SRPO, CAC), and flow policies (FAWAC, FBRAC, IFQL, FQL).
@@ -1183,7 +1209,7 @@ draw();
     </p>
 
     <div class="exp-section">
-      <p class="exp-section-title">Training and Evaluation</p>
+      <p class="exp-section-title">Training and evaluation</p>
       <p class="exp-section-desc">
         DriftQL is trained for 1M gradient steps on state-based OGBench tasks and 500K steps on D4RL tasks, with evaluation every 100K steps. OGBench reports the average over the last three checkpoints; D4RL reports the final checkpoint. Results are averaged over 8 seeds.
       </p>
@@ -1450,7 +1476,7 @@ draw();
     </div>
 
     <div class="exp-section">
-      <p class="exp-section-title">Robustness Under Corrupted Offline Data</p>
+      <p class="exp-section-title">Robustness under corrupted offline data</p>
       <p class="exp-section-desc">
         We corrupt the default OGBench cube-single and antmaze-large datasets by replacing a fraction of actions with uniformly random actions, then average success over the 800k, 900k, and 1M checkpoints. DriftQL stays strong as random-action corruption increases from p = 0.20 to p = 0.40. On Cube, it is strongest at every corruption level. On AntMaze, it degrades more gracefully and becomes strongest at p = 0.40.
       </p>
@@ -1460,7 +1486,7 @@ draw();
     </div>
 
     <div class="exp-section">
-      <p class="exp-section-title">Computational Efficiency and Inference Latency</p>
+      <p class="exp-section-title">Computational efficiency and inference latency</p>
       <p class="exp-section-desc">
         DriftQL acts in one feedforward pass. It avoids denoising chains, ODE solvers, and distillation while matching the latency profile of one-step policies.
       </p>
@@ -1493,7 +1519,7 @@ draw();
     </div>
 
     <div class="exp-section">
-      <p class="exp-section-title">Ablation Study</p>
+      <p class="exp-section-title">Ablation study</p>
       <p class="exp-section-desc">
         We ablate the main DriftQL hyperparameters on antmaze-large-navigate and cube-single-play, changing one setting at a time relative to the tuned defaults.
       </p>
@@ -1503,6 +1529,16 @@ draw();
           <strong>Ablation study.</strong> Success rates across training for \(\alpha\), drift temperature \(\tau\), kernel type, noise dimension, and number of generated actions \(N\).
         </figcaption>
       </figure>
+    </div>
+
+    <div class="columns is-centered">
+      <div class="column">
+        <div class="content has-text-left method-outro">
+          <p>
+            Taken together, the picture is consistent. DriftQL matches or beats diffusion and flow policies across D4RL and OGBench, holds its ground when the offline data is corrupted, and does it all in a single feedforward pass. Simpler at inference, sturdier under noise, and stronger on the benchmarks that actually stress a policy.
+          </p>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -1543,6 +1579,20 @@ draw();
     </div>
   </div>
 </footer>
+
+<button id="back-to-top" aria-label="Back to top" title="Back to top">
+  <i class="fas fa-arrow-up"></i>
+</button>
+
+<script>
+(function(){
+  const btn = document.getElementById('back-to-top');
+  const toggle = () => btn.classList.toggle('visible', window.scrollY > 300);
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  toggle();
+})();
+</script>
 
 </body>
 </html>

@@ -219,8 +219,19 @@ body {
 }
 
 #abstract-section .content p {
-  font-size: 1.2rem;
-  line-height: 1.7;
+  font-size: 1.15rem;
+  line-height: 1.75;
+  margin-bottom: 1.1rem;
+}
+
+#abstract-section .intuition-list {
+  margin: 0.4rem 0 1.1rem 1.5rem;
+  font-size: 1.1rem;
+  line-height: 1.65;
+}
+
+#abstract-section .intuition-list li {
+  margin-bottom: 0.45rem;
 }
 
 #driftql-animation-section {
@@ -236,6 +247,14 @@ body {
   background: #fff;
   border: 0;
   border-radius: 0;
+}
+
+.driftql-top-caption {
+  margin-top: 0.85rem;
+  color: var(--drift-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+  text-align: center;
 }
 
 .publication-video {
@@ -296,10 +315,6 @@ body {
   border-radius: 10px;
   background: #f7f7f7;
   overflow-x: auto;
-}
-
-#method-section .how-it-works-math-intro .column {
-  max-width: 48rem;
 }
 
 #method-section #anim-section {
@@ -369,6 +384,20 @@ body {
   color: #333;
   font-size: 1.05rem;
   line-height: 1.65;
+}
+
+.method-overview-lede {
+  margin-top: 0.85rem;
+  color: #333;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.method-outro {
+  margin-top: 1rem;
+  color: #333;
+  font-size: 1.05rem;
+  line-height: 1.7;
 }
 
 .term-blue {
@@ -818,4 +847,38 @@ body {
 #drift-demo-caption {
   margin-top: 0.75rem;
   color: #555;
+}
+
+#back-to-top {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  z-index: 50;
+}
+
+#back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+#back-to-top:hover {
+  border-color: var(--drift-orange);
+  color: var(--drift-orange);
 }
