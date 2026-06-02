@@ -139,7 +139,8 @@ body {
 .author-note {
   color: #666;
   margin-top: 0.5rem;
-  font-size: 0.95rem !important;
+  font-size: 0.8rem !important;
+  font-weight: 700;
   line-height: 1.45;
 }
 
@@ -162,7 +163,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.9rem;
+  gap: 2.17503rem;
   margin-top: 0.65rem;
   margin-bottom: 0.2rem;
   flex-wrap: wrap;
@@ -188,11 +189,11 @@ body {
 }
 
 .mcgill-logo {
-  height: 78px;
+  height: 58.5px;
 }
 
 .mila-logo {
-  height: 55px;
+  height: 41.25px;
   background: transparent;
   mix-blend-mode: multiply;
 }
