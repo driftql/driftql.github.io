@@ -890,3 +890,18 @@ body {
   border-color: var(--drift-orange);
   color: var(--drift-orange);
 }
+
+.venue-badge-wrap {
+  margin: 0.25rem 0 1rem;
+}
+
+.venue-badge {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  background: #e97822;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
